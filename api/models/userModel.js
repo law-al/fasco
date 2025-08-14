@@ -140,7 +140,11 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.pre(/^find/, async function (next) {
-  this.find({ isActive: { $ne: false } });
+  if (this.getOptions().addIsInActive) {
+    this.find();
+  } else {
+    this.find({ isActive: { $ne: false } });
+  }
   next();
 });
 

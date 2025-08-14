@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendMail } = require('../utils/sendEmail');
 const { StatusCodes } = require('http-status-codes');
+const { skipMiddlewareFunction } = require('mongoose');
 
 const signToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_PASS, {
@@ -13,6 +14,43 @@ const signToken = (userId) => {
 };
 
 exports.register = asyncErrorHandler(async (req, res) => {
+  // check if user exist and is not active
+
+  const existingUser = await User.findOne({
+    $and: [{ email: req.body.email }, { isActive: false }],
+  }).setOptions({ addIsInActive: true });
+
+  if (existingUser) {
+    existingUser.firstname = req.body.firstname;
+    existingUser.lastname = req.body.lastname;
+    existingUser.phone = req.body.phone;
+    existingUser.password = req.body.password;
+    existingUser.confirmPassword = req.body.confirmPassword;
+    existingUser.address = req.body.address;
+    existingUser.isActive = true;
+    existingUser.updatedAt = Date.now();
+    existingUser.passwordResetToken = undefined;
+    existingUser.passwordResetTimer = undefined;
+
+    await existingUser.save();
+    return res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'User created successfully',
+    });
+  }
+
+  // check if user exist and is active
+  const existingUserIsActive = await User.findOne({
+    $and: [{ email: req.body.email }, { isActive: true }],
+  });
+
+  if (existingUserIsActive)
+    throw new CustomError(
+      'User has signed up already',
+      StatusCodes.BAD_REQUEST
+    );
+
+  // else
   const user = await User.create(req.body);
 
   const token = signToken(user._id);
