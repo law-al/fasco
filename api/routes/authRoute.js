@@ -1,0 +1,16 @@
+const {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+} = require('../controllers/authController');
+const { protect } = require('../middleware/protect');
+
+const router = require('express').Router();
+
+router.route('/register').post(register);
+router.route('/login').post(login);
+router.route('/forgot-password').post(protect, forgotPassword);
+router.route('/reset-password/:token').patch(resetPassword);
+
+module.exports = router;

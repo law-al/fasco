@@ -1,0 +1,20 @@
+# API environment files
+api/config.env
+
+# Client environment files
+client/.env
+client/.env.local
+client/.env.production
+
+# Node modules in both folders
+api/node_modules/
+client/node_modules/
+
+
+# Build directories
+client/build/
+client/dist/
+api/dist/
+
+# Logs anywhere in the project
+*.log
