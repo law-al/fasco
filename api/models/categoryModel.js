@@ -11,6 +11,7 @@ const categorySchema = new mongoose.Schema(
     },
     slug: {
       type: String,
+      required: [true, 'Slug is required'],
       lowercase: true,
       unique: true,
       validate: {
@@ -28,7 +29,7 @@ const categorySchema = new mongoose.Schema(
       trim: true,
     },
     image: String,
-    isActive: Boolean,
+    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: true,

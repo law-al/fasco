@@ -16,7 +16,10 @@ const imageSchema = new mongoose.Schema(
 );
 
 const inventorySchema = new mongoose.Schema({
-  color: String,
+  color: {
+    type: String,
+    lowercase: true,
+  },
   size: String,
   quantity: {
     type: Number,
@@ -33,10 +36,10 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      trim: true,
       required: [true, 'Product name is required'],
       lowercase: true,
       minLength: [2, 'Product name must be at least 2 characters long'],
-      trim: true,
     },
     description: {
       type: String,
@@ -63,12 +66,29 @@ const productSchema = new mongoose.Schema(
         message: 'Sale price cannot exceed regular price',
       },
     },
-    category: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }], // should in case something changes in the category schema, it automatically updates
-    brand: String,
-    material: String,
-    colors: [String],
-    sizes: [String],
-    gender: [String],
+    category: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+    ], // should in case something changes in the category schema, it automatically updates
+    brand: {
+      type: String,
+      lowercase: true,
+    },
+    material: {
+      type: String,
+      lowercase: true,
+    },
+    colors: {
+      type: [String],
+      lowercase: true,
+    },
+    sizes: {
+      type: [String],
+      lowercase: true,
+    },
+    gender: {
+      type: [String],
+      lowercase: true,
+    },
     images: [imageSchema],
     inventory: [inventorySchema],
     isActive: { type: Boolean, default: true },
@@ -76,6 +96,8 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+productSchema.index({ name: 'text', description: 'text' });
 
 const Product = mongoose.model('Product', productSchema);
 

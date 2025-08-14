@@ -8,6 +8,8 @@ const mongoStore = require('connect-mongo');
 // ==========================================
 const authRouter = require('./routes/authRoute');
 const userRouter = require('./routes/userRoute');
+const productsRouter = require('./routes/productsRoute');
+
 const CustomError = require('./utils/CustomError');
 
 const app = express();
@@ -42,6 +44,7 @@ app.use(
 // ==========================================
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/products', productsRouter);
 
 // ==========================================
 // UNHANDLED ROUTES
