@@ -5,14 +5,48 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendMail } = require('../utils/sendEmail');
 const { StatusCodes } = require('http-status-codes');
+const { skipMiddlewareFunction } = require('mongoose');
 
-const signToken = (userId) => {
+const signToken = userId => {
   return jwt.sign({ id: userId }, process.env.JWT_PASS, {
     expiresIn: 30 * 60 * 1000,
   });
 };
 
 exports.register = asyncErrorHandler(async (req, res) => {
+  // check if user exist and is not active
+
+  const existingUser = await User.findOne({
+    $and: [{ email: req.body.email }, { isActive: false }],
+  }).setOptions({ addIsInActive: true });
+
+  if (existingUser) {
+    existingUser.firstname = req.body.firstname;
+    existingUser.lastname = req.body.lastname;
+    existingUser.phone = req.body.phone;
+    existingUser.password = req.body.password;
+    existingUser.confirmPassword = req.body.confirmPassword;
+    existingUser.address = req.body.address;
+    existingUser.isActive = true;
+    existingUser.updatedAt = Date.now();
+    existingUser.passwordResetToken = undefined;
+    existingUser.passwordResetTimer = undefined;
+
+    await existingUser.save();
+    return res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'User created successfully',
+    });
+  }
+
+  // check if user exist and is active
+  const existingUserIsActive = await User.findOne({
+    $and: [{ email: req.body.email }, { isActive: true }],
+  });
+
+  if (existingUserIsActive) throw new CustomError('User has signed up already', StatusCodes.BAD_REQUEST);
+
+  // else
   const user = await User.create(req.body);
 
   const token = signToken(user._id);
@@ -33,14 +67,16 @@ exports.login = asyncErrorHandler(async (req, res) => {
 
   const isMatch = await user.isPasswordMatched(password, user.password);
 
-  if (!isMatch)
-    throw new CustomError('wrong credentials!', StatusCodes.BAD_REQUEST);
+  if (!isMatch) throw new CustomError('wrong credentials!', StatusCodes.BAD_REQUEST);
   const token = signToken(user._id);
 
   req.session.user = { id: user._id.toString(), token };
 
   user.passwordResetToken = undefined;
   user.passwordResetTimer = undefined;
+
+  // assign user session max age
+  req.session.cookie.maxAge = +process.env.USER_SESSION_MAX_AGE;
 
   res.status(StatusCodes.OK).json({
     status: 'success',
@@ -52,8 +88,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
   const { email } = req.body;
 
   const user = await User.findOne({ email });
-  if (!user)
-    throw new CustomError('Email not correct', StatusCodes.BAD_REQUEST);
+  if (!user) throw new CustomError('Email not correct', StatusCodes.BAD_REQUEST);
 
   const resetToken = user.createResetPasswordToken();
   // calling this function set a passwordResetToken and a passwordResetTimer, then save the user
@@ -61,9 +96,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
     validateBeforeSave: false,
   });
 
-  const requestUrl = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/auth/reset-password/${resetToken}`;
+  const requestUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
   const text = `We have recieved a password request. Please use the below link to reset your password\n\n${requestUrl}\n\nThis reset password link will be valid for only 10mins`;
 
   try {
@@ -93,20 +126,13 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
 exports.resetPassword = asyncErrorHandler(async (req, res) => {
   const { token } = req.params;
 
-  const passwordResetToken = crypto
-    .createHash('sha256')
-    .update(token)
-    .digest('hex');
+  const passwordResetToken = crypto.createHash('sha256').update(token).digest('hex');
   const user = await User.findOne({
     passwordResetToken,
     passwordResetTimer: { $gte: Date.now() }, // meaning return queries where the passwordTimer is greater than Date.now()
   });
 
-  if (!user)
-    throw new CustomError(
-      'Token is invalid or has expired',
-      StatusCodes.BAD_REQUEST
-    );
+  if (!user) throw new CustomError('Token is invalid or has expired', StatusCodes.BAD_REQUEST);
 
   user.password = req.body.newPassword;
   user.confirmPassword = req.body.newConfirmPassword;

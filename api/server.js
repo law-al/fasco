@@ -1,14 +1,15 @@
 require('dotenv').config({ path: './config.env' });
 const mongoose = require('mongoose');
+const scheduleCartCleanUp = require('./utils/scheduleCartCleanUp');
 
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', err => {
   console.log(err.message);
   console.log('Unhandled rejection occured! Shutting down!!!');
 
   process.exit(1);
 });
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.log(err.message);
   console.log('Unhandled rejection occured! Shutting down!!!');
 
@@ -26,5 +27,6 @@ const connectDb = async () => {
 
 app.listen(port, async () => {
   await connectDb();
+  await scheduleCartCleanUp(); //cron service
   console.log('server started');
 });

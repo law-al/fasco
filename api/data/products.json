@@ -1,0 +1,733 @@
+[
+  {
+    "name": "classic leather jacket",
+    "description": "premium leather jacket with vintage styling perfect for casual and evening wear",
+    "shortDescription": "classic leather jacket with vintage appeal",
+    "price": 149.99,
+    "salesPrice": 119.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "100% Genuine Leather",
+    "colors": ["black", "brown", "navy"],
+    "sizes": ["S", "M", "L", "XL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/leather-jacket-black.jpg",
+        "altText": "Black leather jacket front view",
+        "color": "black",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "black",
+        "size": "M",
+        "quantity": 8,
+        "sku": "UC-LJ-BLK-M-001"
+      },
+      {
+        "color": "brown",
+        "size": "L",
+        "quantity": 5,
+        "sku": "UC-LJ-BRN-L-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  },
+  {
+    "name": "elegant midi wrap dress",
+    "description": "sophisticated wrap dress featuring adjustable waist tie and flowing midi length perfect for office or dinner",
+    "shortDescription": "elegant wrap dress for professional and casual wear",
+    "price": 79.99,
+    "salesPrice": 59.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "95% Viscose, 5% Spandex",
+    "colors": ["pink", "navy", "burgundy"],
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/wrap-dress-pink.jpg",
+        "altText": "Pink wrap dress front view",
+        "color": "pink",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "pink",
+        "size": "S",
+        "quantity": 12,
+        "sku": "FC-WD-PNK-S-001"
+      },
+      {
+        "color": "navy",
+        "size": "M",
+        "quantity": 18,
+        "sku": "FC-WD-NVY-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "cotton polo shirt",
+    "description": "breathable cotton polo shirt with classic collar design ideal for smart casual occasions",
+    "shortDescription": "classic cotton polo for smart casual wear",
+    "price": 34.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "100% Cotton",
+    "colors": ["white", "navy", "gray"],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/polo-white.jpg",
+        "altText": "White cotton polo shirt",
+        "color": "white",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "white",
+        "size": "L",
+        "quantity": 22,
+        "sku": "UC-PL-WHT-L-001"
+      },
+      {
+        "color": "navy",
+        "size": "M",
+        "quantity": 16,
+        "sku": "UC-PL-NVY-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "summer maxi dress",
+    "description": "flowing maxi dress with floral print perfect for beach vacations and summer events",
+    "shortDescription": "flowing maxi dress for summer occasions",
+    "price": 69.99,
+    "salesPrice": 49.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "100% Rayon",
+    "colors": ["pink", "yellow", "turquoise"],
+    "sizes": ["XS", "S", "M", "L"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/maxi-dress-pink.jpg",
+        "altText": "Pink maxi dress with floral print",
+        "color": "pink",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "pink",
+        "size": "M",
+        "quantity": 10,
+        "sku": "FC-MD-PNK-M-001"
+      },
+      {
+        "color": "yellow",
+        "size": "S",
+        "quantity": 8,
+        "sku": "FC-MD-YLW-S-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  },
+  {
+    "name": "formal dress shirt",
+    "description": "crisp white dress shirt with french cuffs perfect for business meetings and formal events",
+    "shortDescription": "formal dress shirt for business wear",
+    "price": 59.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "100% Cotton",
+    "colors": ["white", "light blue", "pink"],
+    "sizes": ["S", "M", "L", "XL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/dress-shirt-white.jpg",
+        "altText": "White formal dress shirt",
+        "color": "white",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "white",
+        "size": "M",
+        "quantity": 25,
+        "sku": "UC-DS-WHT-M-001"
+      },
+      {
+        "color": "pink",
+        "size": "L",
+        "quantity": 14,
+        "sku": "UC-DS-PNK-L-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "casual blazer",
+    "description": "versatile casual blazer that transitions perfectly from office to evening social events",
+    "shortDescription": "versatile blazer for multiple occasions",
+    "price": 89.99,
+    "salesPrice": 69.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "70% Polyester, 30% Viscose",
+    "colors": ["black", "navy", "pink"],
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/blazer-black.jpg",
+        "altText": "Black casual blazer front view",
+        "color": "black",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "black",
+        "size": "S",
+        "quantity": 15,
+        "sku": "FC-BL-BLK-S-001"
+      },
+      {
+        "color": "pink",
+        "size": "M",
+        "quantity": 9,
+        "sku": "FC-BL-PNK-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  },
+  {
+    "name": "denim jeans",
+    "description": "classic straight-leg denim jeans with traditional five-pocket styling for everyday comfort",
+    "shortDescription": "classic straight-leg denim jeans",
+    "price": 79.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "98% Cotton, 2% Elastane",
+    "colors": ["dark blue", "light blue", "black"],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/jeans-dark-blue.jpg",
+        "altText": "Dark blue denim jeans",
+        "color": "dark blue",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "dark blue",
+        "size": "M",
+        "quantity": 30,
+        "sku": "UC-JN-DBL-M-001"
+      },
+      {
+        "color": "light blue",
+        "size": "L",
+        "quantity": 20,
+        "sku": "UC-JN-LBL-L-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "silk blouse",
+    "description": "luxurious silk blouse with delicate button details perfect for professional and elegant occasions",
+    "shortDescription": "luxurious silk blouse for elegant wear",
+    "price": 99.99,
+    "salesPrice": 79.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "100% Silk",
+    "colors": ["cream", "pink", "navy"],
+    "sizes": ["XS", "S", "M", "L"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/silk-blouse-cream.jpg",
+        "altText": "Cream silk blouse with button details",
+        "color": "cream",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "cream",
+        "size": "S",
+        "quantity": 8,
+        "sku": "FC-SB-CRM-S-001"
+      },
+      {
+        "color": "pink",
+        "size": "M",
+        "quantity": 6,
+        "sku": "FC-SB-PNK-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  },
+  {
+    "name": "casual hoodie",
+    "description": "comfortable cotton hoodie with front pocket and adjustable drawstring hood for relaxed wear",
+    "shortDescription": "comfortable cotton hoodie for casual wear",
+    "price": 44.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "80% Cotton, 20% Polyester",
+    "colors": ["gray", "navy", "black"],
+    "sizes": ["S", "M", "L", "XL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/hoodie-gray.jpg",
+        "altText": "Gray casual hoodie with front pocket",
+        "color": "gray",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "gray",
+        "size": "L",
+        "quantity": 18,
+        "sku": "UC-HD-GRY-L-001"
+      },
+      {
+        "color": "navy",
+        "size": "M",
+        "quantity": 14,
+        "sku": "UC-HD-NVY-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "pencil skirt",
+    "description": "tailored pencil skirt with high waistband perfect for office wear and professional meetings",
+    "shortDescription": "tailored pencil skirt for professional wear",
+    "price": 54.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "95% Polyester, 5% Elastane",
+    "colors": ["black", "navy", "pink"],
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/pencil-skirt-black.jpg",
+        "altText": "Black pencil skirt with high waistband",
+        "color": "black",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "black",
+        "size": "M",
+        "quantity": 20,
+        "sku": "FC-PS-BLK-M-001"
+      },
+      {
+        "color": "pink",
+        "size": "S",
+        "quantity": 12,
+        "sku": "FC-PS-PNK-S-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "v-neck sweater",
+    "description": "soft merino wool v-neck sweater with ribbed cuffs perfect for layering in cooler weather",
+    "shortDescription": "soft merino wool v-neck sweater",
+    "price": 69.99,
+    "salesPrice": 54.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "100% Merino Wool",
+    "colors": ["navy", "gray", "burgundy"],
+    "sizes": ["S", "M", "L", "XL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/v-neck-sweater-navy.jpg",
+        "altText": "Navy v-neck merino wool sweater",
+        "color": "navy",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "navy",
+        "size": "M",
+        "quantity": 16,
+        "sku": "UC-VS-NVY-M-001"
+      },
+      {
+        "color": "gray",
+        "size": "L",
+        "quantity": 11,
+        "sku": "UC-VS-GRY-L-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  },
+  {
+    "name": "cocktail dress",
+    "description": "elegant cocktail dress with lace detailing perfect for evening parties and special occasions",
+    "shortDescription": "elegant lace cocktail dress for special events",
+    "price": 129.99,
+    "salesPrice": 99.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "70% Polyester, 30% Lace",
+    "colors": ["black", "pink", "burgundy"],
+    "sizes": ["XS", "S", "M", "L"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/cocktail-dress-black.jpg",
+        "altText": "Black lace cocktail dress",
+        "color": "black",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "black",
+        "size": "S",
+        "quantity": 7,
+        "sku": "FC-CD-BLK-S-001"
+      },
+      {
+        "color": "pink",
+        "size": "M",
+        "quantity": 5,
+        "sku": "FC-CD-PNK-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  },
+  {
+    "name": "cargo shorts",
+    "description": "durable cotton cargo shorts with multiple pockets perfect for outdoor activities and casual wear",
+    "shortDescription": "durable cargo shorts with multiple pockets",
+    "price": 39.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "100% Cotton",
+    "colors": ["khaki", "olive", "navy"],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/cargo-shorts-khaki.jpg",
+        "altText": "Khaki cargo shorts with pockets",
+        "color": "khaki",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "khaki",
+        "size": "L",
+        "quantity": 25,
+        "sku": "UC-CS-KHK-L-001"
+      },
+      {
+        "color": "olive",
+        "size": "M",
+        "quantity": 20,
+        "sku": "UC-CS-OLV-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "cardigan sweater",
+    "description": "cozy knit cardigan with button closure perfect for layering during transitional seasons",
+    "shortDescription": "cozy knit cardigan for layering",
+    "price": 74.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "60% Cotton, 40% Acrylic",
+    "colors": ["cream", "pink", "gray"],
+    "sizes": ["S", "M", "L", "XL"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/cardigan-cream.jpg",
+        "altText": "Cream knit cardigan with buttons",
+        "color": "cream",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "cream",
+        "size": "M",
+        "quantity": 13,
+        "sku": "FC-CG-CRM-M-001"
+      },
+      {
+        "color": "pink",
+        "size": "L",
+        "quantity": 10,
+        "sku": "FC-CG-PNK-L-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "flannel shirt",
+    "description": "soft cotton flannel shirt with classic plaid pattern perfect for casual weekend wear",
+    "shortDescription": "soft cotton flannel shirt with plaid pattern",
+    "price": 49.99,
+    "salesPrice": 39.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "100% Cotton Flannel",
+    "colors": ["red", "blue", "green"],
+    "sizes": ["S", "M", "L", "XL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/flannel-shirt-red.jpg",
+        "altText": "Red plaid flannel shirt",
+        "color": "red",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "red",
+        "size": "L",
+        "quantity": 17,
+        "sku": "UC-FL-RED-L-001"
+      },
+      {
+        "color": "blue",
+        "size": "M",
+        "quantity": 22,
+        "sku": "UC-FL-BLU-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "jumpsuit",
+    "description": "stylish one-piece jumpsuit with wide legs and adjustable belt perfect for modern fashion statement",
+    "shortDescription": "stylish wide-leg jumpsuit with belt",
+    "price": 89.99,
+    "salesPrice": 69.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "95% Polyester, 5% Spandex",
+    "colors": ["black", "pink", "olive"],
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/jumpsuit-black.jpg",
+        "altText": "Black wide-leg jumpsuit with belt",
+        "color": "black",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "black",
+        "size": "M",
+        "quantity": 12,
+        "sku": "FC-JP-BLK-M-001"
+      },
+      {
+        "color": "pink",
+        "size": "S",
+        "quantity": 8,
+        "sku": "FC-JP-PNK-S-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  },
+  {
+    "name": "track pants",
+    "description": "comfortable athletic track pants with elastic waistband perfect for gym workouts and casual wear",
+    "shortDescription": "comfortable athletic track pants",
+    "price": 34.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "90% Polyester, 10% Spandex",
+    "colors": ["black", "navy", "gray"],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/track-pants-black.jpg",
+        "altText": "Black athletic track pants",
+        "color": "black",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "black",
+        "size": "M",
+        "quantity": 28,
+        "sku": "UC-TP-BLK-M-001"
+      },
+      {
+        "color": "navy",
+        "size": "L",
+        "quantity": 24,
+        "sku": "UC-TP-NVY-L-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "midi skirt",
+    "description": "flowing midi skirt with elastic waistband perfect for both casual and semi-formal occasions",
+    "shortDescription": "flowing midi skirt with elastic waist",
+    "price": 44.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "100% Polyester",
+    "colors": ["navy", "pink", "burgundy"],
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/midi-skirt-navy.jpg",
+        "altText": "Navy flowing midi skirt",
+        "color": "navy",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "navy",
+        "size": "M",
+        "quantity": 19,
+        "sku": "FC-MS-NVY-M-001"
+      },
+      {
+        "color": "pink",
+        "size": "S",
+        "quantity": 15,
+        "sku": "FC-MS-PNK-S-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "henley shirt",
+    "description": "classic henley shirt with button placket perfect for casual layering and weekend comfort",
+    "shortDescription": "classic henley shirt with button placket",
+    "price": 29.99,
+    "salesPrice": 24.99,
+    "category": ["689dc181dca545a0e6da79e5"],
+    "brand": "UrbanClassic",
+    "material": "100% Cotton",
+    "colors": ["white", "gray", "navy"],
+    "sizes": ["S", "M", "L", "XL"],
+    "gender": ["men"],
+    "images": [
+      {
+        "url": "https://example.com/henley-shirt-white.jpg",
+        "altText": "White henley shirt with button placket",
+        "color": "white",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "white",
+        "size": "M",
+        "quantity": 26,
+        "sku": "UC-HS-WHT-M-001"
+      },
+      {
+        "color": "gray",
+        "size": "L",
+        "quantity": 21,
+        "sku": "UC-HS-GRY-L-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": false
+  },
+  {
+    "name": "evening gown",
+    "description": "stunning floor-length evening gown with elegant draping perfect for formal events and galas",
+    "shortDescription": "elegant floor-length evening gown",
+    "price": 199.99,
+    "salesPrice": 159.99,
+    "category": ["689dc2b3ce625e83434f1735"],
+    "brand": "FloralChic",
+    "material": "100% Silk Chiffon",
+    "colors": ["black", "pink", "emerald"],
+    "sizes": ["XS", "S", "M", "L"],
+    "gender": ["women"],
+    "images": [
+      {
+        "url": "https://example.com/evening-gown-black.jpg",
+        "altText": "Black silk evening gown with elegant draping",
+        "color": "black",
+        "isPrimary": true
+      }
+    ],
+    "inventory": [
+      {
+        "color": "black",
+        "size": "S",
+        "quantity": 4,
+        "sku": "FC-EG-BLK-S-001"
+      },
+      {
+        "color": "pink",
+        "size": "M",
+        "quantity": 3,
+        "sku": "FC-EG-PNK-M-001"
+      }
+    ],
+    "isActive": true,
+    "isFeatured": true
+  }
+]

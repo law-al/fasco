@@ -10,7 +10,6 @@ client/.env.production
 api/node_modules/
 client/node_modules/
 
-
 # Build directories
 client/build/
 client/dist/
@@ -18,3 +17,11 @@ api/dist/
 
 # Logs anywhere in the project
 *.log
+
+# Prettier configuration
+.prettierrc
+api/.prettierrc
+
+# VS Code settings
+.vscode/
+api/.vscode
