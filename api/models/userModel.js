@@ -148,18 +148,14 @@ userSchema.pre(/^find/, async function (next) {
   next();
 });
 
-userSchema.methods.isPasswordMatched = async (
-  inputedPassword,
-  hashedPasswordFromDB
-) => {
+userSchema.methods.isPasswordMatched = async (inputedPassword, hashedPasswordFromDB) => {
   return await bcrypt.compare(inputedPassword, hashedPasswordFromDB);
 };
 
 userSchema.methods.passwordModified = function (issuedAtToken) {
   if (this.passwordChangedAt) {
-    const passwordChangedDate = parseInt(
-      new Date(this.passwordChangedAt).getTime()
-    );
+    const passwordChangedDate = parseInt(new Date(this.passwordChangedAt).getTime()) / 1000;
+
     return issuedAtToken < passwordChangedDate;
   }
 };
@@ -167,10 +163,7 @@ userSchema.methods.passwordModified = function (issuedAtToken) {
 userSchema.methods.createResetPasswordToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
+  const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
   this.passwordResetToken = hashedToken;
   this.passwordResetTimer = Date.now() + 10 * 60 * 1000;
   return resetToken;

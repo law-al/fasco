@@ -119,6 +119,14 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
 
   const products = await results;
 
+  if (products.length === 0) {
+    return res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Products not found',
+      data: null,
+    });
+  }
+
   res.status(StatusCodes.OK).json({
     status: 'success',
     length: products.length,
@@ -136,6 +144,20 @@ exports.getFeatured = asyncErrorHandler(async (req, res) => {
     length: products.length,
     data: {
       products,
+    },
+  });
+});
+
+exports.getProduct = asyncErrorHandler(async (req, res) => {
+  const product = await Product.findById(req.params.productId);
+
+  if (!product)
+    throw new CustomError('No product found', StatusCodes.NOT_FOUND);
+
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    data: {
+      product,
     },
   });
 });

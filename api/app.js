@@ -9,6 +9,7 @@ const mongoStore = require('connect-mongo');
 const authRouter = require('./routes/authRoute');
 const userRouter = require('./routes/userRoute');
 const productsRouter = require('./routes/productsRoute');
+const cartRouter = require('./routes/cartRoute');
 
 const CustomError = require('./utils/CustomError');
 
@@ -34,10 +35,13 @@ app.use(
       ttl: 24 * 60 * 60, // 24 hours
       touchAfter: 24 * 3600, // Only update session once per 24 hours unless data changes
     }),
-    cookie: { maxAge: 24 * 60 * 60 * 1000 },
+    cookie: { maxAge: +process.env.GUEST_SESSION_MAX_AGE },
     rolling: true, // Reset expiration on each request
   })
 );
+
+console.log('USER_SESSION_MAX_AGE:', +process.env.GUEST_SESSION_MAX_AGE);
+console.log('Type:', typeof +process.env.GUEST_SESSION_MAX_AGE);
 
 // ==========================================
 // ROUTE MIDDLEWARE
@@ -45,6 +49,7 @@ app.use(
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/products', productsRouter);
+app.use('/api/v1/cart', cartRouter);
 
 // ==========================================
 // UNHANDLED ROUTES
