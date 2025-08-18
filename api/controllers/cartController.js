@@ -18,8 +18,6 @@ const checkAndUpdateInventory = async (product, productId, sku, color, size, qua
       inventory: {
         $elemMatch: {
           sku: sku,
-          color: color,
-          size: size,
           quantity: { $gte: quantity },
         },
       },
@@ -86,7 +84,7 @@ const cleanupExpiredGuestCarts = async session => {
 };
 
 exports.addToCart = asyncErrorHandler(async (req, res) => {
-  const { productId, sku, size, color, quantity } = req.body;
+  const { productId, sku, quantity } = req.body;
   let cart;
 
   const session = await mongoose.startSession();
@@ -106,14 +104,15 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
       cart = await Cart.findOne({ userId: user.id.toString() }).session(session);
 
       if (!cart) {
-        await checkAndUpdateInventory(product, productId, sku, color, size, Number(quantity), session);
+        await checkAndUpdateInventory(product, productId, sku, Number(quantity), session);
 
         // Create new cart for user
         const items = {
           productId,
           name: product.name,
-          color,
-          size,
+          color: product.inventory.find(item => item.sku === sku).color,
+          size: product.inventory.find(item => item.sku === sku).size,
+          image: product.images.find(image => image.isPrimary === true).url,
           sku,
           quantity: Number(quantity),
           priceAtTimeAdded: product.salesPrice || product.price,
@@ -145,12 +144,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
       } else {
         // Update existing cart
         const productInCartIndex = cart.items.findIndex(item => {
-          return (
-            item.productId.toString() === productId.toString() &&
-            item.sku === sku &&
-            item.color === color &&
-            item.size === size
-          );
+          return item.productId.toString() === productId.toString() && item.sku === sku;
         });
 
         if (productInCartIndex > -1) {
@@ -159,7 +153,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
 
           if (quantityDiff > 0) {
             // Need more items - reserve the difference
-            await checkAndUpdateInventory(product, productId, sku, color, size, quantityDiff, session);
+            await checkAndUpdateInventory(product, productId, sku, quantityDiff, session);
           } else if (quantityDiff < 0) {
             // Return items to inventory
             await Product.updateOne(
@@ -171,13 +165,14 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
 
           cart.items[productInCartIndex].quantity = Number(quantity);
         } else {
-          await checkAndUpdateInventory(product, productId, sku, color, size, Number(quantity), session);
+          await checkAndUpdateInventory(product, productId, sku, Number(quantity), session);
 
           cart.items.push({
             productId,
             name: product.name,
-            color,
-            size,
+            color: product.inventory.find(item => item.sku === sku).color,
+            size: product.inventory.find(item => item.sku === sku).size,
+            image: product.images.find(image => image.isPrimary === true).url,
             sku,
             quantity: Number(quantity),
             priceAtTimeAdded: product.salesPrice || product.price,
@@ -211,14 +206,15 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
       cart = await Cart.findOne({ guestId }).session(session);
 
       if (!cart) {
-        await checkAndUpdateInventory(product, productId, sku, color, size, Number(quantity), session);
+        await checkAndUpdateInventory(product, productId, sku, Number(quantity), session);
 
         // Create new cart for guest
         const items = {
           productId,
           name: product.name,
-          color,
-          size,
+          color: product.inventory.find(item => item.sku === sku).color,
+          size: product.inventory.find(item => item.sku === sku).size,
+          image: product.images.find(image => image.isPrimary === true).url,
           sku,
           quantity: Number(quantity),
           priceAtTimeAdded: product.salesPrice || product.price,
@@ -252,12 +248,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
       } else {
         // Update existing guest cart
         const productInCartIndex = cart.items.findIndex(item => {
-          return (
-            item.productId.toString() === productId.toString() &&
-            item.sku === sku &&
-            item.color === color &&
-            item.size === size
-          );
+          return item.productId.toString() === productId.toString() && item.sku === sku;
         });
 
         if (productInCartIndex > -1) {
@@ -266,7 +257,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
 
           if (quantityDiff > 0) {
             // Need more items - reserve the difference
-            await checkAndUpdateInventory(product, productId, sku, color, size, quantityDiff, session);
+            await checkAndUpdateInventory(product, productId, sku, quantityDiff, session);
           } else if (quantityDiff < 0) {
             // Return items to inventory
             await Product.updateOne(
@@ -277,12 +268,13 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
           }
           cart.items[productInCartIndex].quantity = Number(quantity);
         } else {
-          await checkAndUpdateInventory(product, productId, sku, color, size, Number(quantity), session);
+          await checkAndUpdateInventory(product, productId, sku, Number(quantity), session);
           cart.items.push({
             productId,
             name: product.name,
-            color,
-            size,
+            color: product.inventory.find(item => item.sku === sku).color,
+            size: product.inventory.find(item => item.sku === sku).size,
+            image: product.images.find(image => image.isPrimary === true).url,
             sku,
             quantity: Number(quantity),
             priceAtTimeAdded: product.salesPrice || product.price,
