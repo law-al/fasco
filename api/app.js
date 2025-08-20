@@ -2,6 +2,7 @@ const express = require('express');
 // const morgan = require('morgan');
 const session = require('express-session');
 const mongoStore = require('connect-mongo');
+const cors = require('cors');
 
 // ==========================================
 // ROUTES
@@ -19,6 +20,13 @@ const app = express();
 // ==========================================
 // MIDDLEWARES
 // ==========================================
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // your frontend URL
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 // app.use(morgan('dev'));
 
