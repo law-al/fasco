@@ -1,0 +1,122 @@
+[
+  {
+    "code": "WELCOME10",
+    "name": "Welcome New Customer",
+    "type": "percentage",
+    "value": 10,
+    "minimumAmount": 50,
+    "maxUses": 1000,
+    "currentUses": 245,
+    "startDate": "2024-01-01T00:00:00.000Z",
+    "endDate": "2024-12-31T23:59:59.000Z",
+    "isActive": true
+  },
+  {
+    "code": "SAVE20",
+    "name": "20% Off Everything",
+    "type": "percentage",
+    "value": 20,
+    "minimumAmount": 100,
+    "maxUses": 500,
+    "currentUses": 123,
+    "startDate": "2024-08-01T00:00:00.000Z",
+    "endDate": "2024-08-31T23:59:59.000Z",
+    "isActive": true
+  },
+  {
+    "code": "FIXED25",
+    "name": "25 Dollars Off",
+    "type": "fixed",
+    "value": 25,
+    "minimumAmount": 150,
+    "maxUses": 200,
+    "currentUses": 87,
+    "startDate": "2024-08-10T00:00:00.000Z",
+    "endDate": "2024-09-10T23:59:59.000Z",
+    "isActive": true
+  },
+  {
+    "code": "FIRSTBUY",
+    "name": "First Time Buyer Discount",
+    "type": "percentage",
+    "value": 15,
+    "minimumAmount": 75,
+    "maxUses": null,
+    "currentUses": 1456,
+    "startDate": "2024-01-01T00:00:00.000Z",
+    "endDate": "2024-12-31T23:59:59.000Z",
+    "isActive": true
+  },
+  {
+    "code": "SUMMER30",
+    "name": "Summer Sale 30% Off",
+    "type": "percentage",
+    "value": 30,
+    "minimumAmount": 200,
+    "maxUses": 100,
+    "currentUses": 100,
+    "startDate": "2024-06-01T00:00:00.000Z",
+    "endDate": "2024-08-31T23:59:59.000Z",
+    "isActive": false
+  },
+  {
+    "code": "FREESHIP",
+    "name": "Free Shipping Coupon",
+    "type": "fixed",
+    "value": 10,
+    "minimumAmount": 50,
+    "maxUses": 2000,
+    "currentUses": 567,
+    "startDate": "2024-08-01T00:00:00.000Z",
+    "endDate": "2024-12-31T23:59:59.000Z",
+    "isActive": true
+  },
+  {
+    "code": "STUDENT25",
+    "name": "Student Discount",
+    "type": "percentage",
+    "value": 25,
+    "minimumAmount": 0,
+    "maxUses": null,
+    "currentUses": 2341,
+    "startDate": "2024-01-01T00:00:00.000Z",
+    "endDate": "2025-12-31T23:59:59.000Z",
+    "isActive": true
+  },
+  {
+    "code": "EXPIRED10",
+    "name": "Old Expired Coupon",
+    "type": "percentage",
+    "value": 10,
+    "minimumAmount": 50,
+    "maxUses": 100,
+    "currentUses": 45,
+    "startDate": "2024-01-01T00:00:00.000Z",
+    "endDate": "2024-07-31T23:59:59.000Z",
+    "isActive": false
+  },
+  {
+    "code": "BIGSPENDER",
+    "name": "High Value Customer",
+    "type": "fixed",
+    "value": 50,
+    "minimumAmount": 500,
+    "maxUses": 50,
+    "currentUses": 12,
+    "startDate": "2024-08-01T00:00:00.000Z",
+    "endDate": "2024-12-31T23:59:59.000Z",
+    "isActive": true
+  },
+  {
+    "code": "LOYALTY5",
+    "name": "Loyalty Member Bonus",
+    "type": "percentage",
+    "value": 5,
+    "minimumAmount": 25,
+    "maxUses": null,
+    "currentUses": 8923,
+    "startDate": "2024-01-01T00:00:00.000Z",
+    "endDate": "2025-12-31T23:59:59.000Z",
+    "isActive": true
+  }
+]

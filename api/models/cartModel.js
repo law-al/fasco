@@ -13,6 +13,7 @@ const cartItemSchema = new mongoose.Schema(
     sku: String,
     color: String,
     size: String,
+    iamge: String,
     quantity: {
       type: Number,
       required: true,
@@ -37,6 +38,11 @@ const cartSchema = new mongoose.Schema(
     items: [cartItemSchema],
     totalPrice: Number,
     expiresAt: Date,
+    appliedCoupon: {
+      code: String,
+      discount: Number,
+      appliedAt: Date,
+    },
   },
   {
     timestamps: true,

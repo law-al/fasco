@@ -132,7 +132,7 @@ exports.resetPassword = asyncErrorHandler(async (req, res) => {
     passwordResetTimer: { $gte: Date.now() }, // meaning return queries where the passwordTimer is greater than Date.now()
   });
 
-  if (!user) throw new CustomError('Token is invalid or has expired', StatusCodes.BAD_REQUEST);
+  if (!user) throw new CustomError('Reset link has expired', StatusCodes.BAD_REQUEST);
 
   user.password = req.body.newPassword;
   user.confirmPassword = req.body.newConfirmPassword;
