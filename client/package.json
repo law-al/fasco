@@ -15,6 +15,7 @@
     "@nuxt/ui": "^3.3.2",
     "@tailwindcss/vite": "^4.1.12",
     "@vee-validate/yup": "^4.15.1",
+    "@vueuse/router": "^13.7.0",
     "axios": "^1.11.0",
     "clsx": "^2.1.1",
     "nuxt": "^4.0.3",
@@ -25,5 +26,9 @@
     "vue-router": "^4.5.1",
     "yup": "^1.7.0",
     "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@vueuse/core": "^13.7.0",
+    "@vueuse/nuxt": "^13.7.0"
   }
 }
