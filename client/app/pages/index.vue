@@ -65,22 +65,21 @@
   <!-- Deal of the week -->
 
   <section class="w-full py-10 font-primary text-gray-800 bg-gray-200">
-    <DealOfTheMonth
-      :deals="deals"
-      :pending="pending"
-      :error="error"
-      :timeLeft="timeLeft"
-    />
+    <DealOfTheMonth :deals="deals" :pending="pending" :error="error" />
   </section>
 
   <!-- New Arrival -->
   <section class="w-[1200px] py-20 mx-auto">
-    <NewArrivals />
+    <NewArrivals
+      :products="products"
+      :pending="newArrivalPending"
+      @tab-changed="handleTabChange"
+    />
   </section>
 
   <!-- Featured Products -->
   <section class="py-10 w-full">
-    <FeaturedProduct />
+    <FeaturedProduct :items="items" />
   </section>
 
   <section class="w-[1200px] py-10 mx-auto">
@@ -126,6 +125,12 @@ definePageMeta({
 });
 const config = useRuntimeConfig();
 
+const currentTab = ref('all');
+
+function handleTabChange(value) {
+  currentTab.value = value;
+}
+
 const {
   data: deals,
   pending,
@@ -136,6 +141,45 @@ const {
 
   transform: response => {
     return response.data.deals[0];
+  },
+});
+
+const {
+  data: products,
+  pending: newArrivalPending,
+  error: newArrivalError,
+} = await useFetch(`/api/v1/products/new-arrivals`, {
+  query: { option: computed(() => currentTab.value) },
+  baseURL: config.public.apiBase,
+  credentials: 'include',
+
+  transform: response => {
+    return response.data.products.map(product => {
+      const firstImage = product.images?.[0];
+      return {
+        name: product.name,
+        price: product.price,
+        image: firstImage?.url || '',
+        alt: firstImage?.altText || product.name,
+      };
+    });
+  },
+});
+
+const { data: items } = await useFetch('api/v1/products/featured-products', {
+  baseURL: config.public.apiBase,
+  credentials: 'include',
+  transform: response => {
+    return response.data.products.map(product => {
+      return {
+        name: product.name,
+        image: product.images[0].url,
+        category: product.category[0].name,
+        description: product.description,
+        sizes: product.sizes,
+        price: product.salesPrice || product.price,
+      };
+    });
   },
 });
 </script>

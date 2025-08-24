@@ -82,6 +82,11 @@
 </template>
 
 <script setup>
+const props = defineProps({
+  products: Object,
+  pending: Boolean,
+});
+const emit = defineEmits(['tabChanged']);
 const items = [
   {
     label: 'All',
@@ -94,84 +99,10 @@ const items = [
   },
 ];
 
-// const products = [
-//   {
-//     image: {
-//       img: 'https://images.unsplash.com/photo-1545291730-faff8ca1d4b0?q=80&w=400&h=400&auto=format&fit=crop',
-//       alt: 'Elegant black evening dress',
-//     },
-//     name: 'Shinny Dress',
-//     price: 9.99,
-//   },
-//   {
-//     image: {
-//       img: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=400&h=400&auto=format&fit=crop',
-//       alt: 'Classic white sneakers',
-//     },
-//     name: 'Classic White Sneakers',
-//     price: 79.99,
-//   },
-//   {
-//     image: {
-//       img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=400&h=400&auto=format&fit=crop',
-//       alt: 'Denim jacket with vintage wash',
-//     },
-//     name: 'Vintage Denim Jacket',
-//     price: 89.99,
-//   },
-//   {
-//     image: {
-//       img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=400&h=400&auto=format&fit=crop',
-//       alt: 'Floral summer dress',
-//     },
-//     name: 'Floral Summer Dress',
-//     price: 49.99,
-//   },
-//   {
-//     image: {
-//       img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=400&h=400&auto=format&fit=crop',
-//       alt: 'Leather crossbody handbag',
-//     },
-//     name: 'Leather Crossbody Bag',
-//     price: 129.99,
-//   },
-//   {
-//     image: {
-//       img: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=400&h=400&auto=format&fit=crop',
-//       alt: 'Cozy knit sweater in beige',
-//     },
-//     name: 'Cozy Knit Sweater',
-//     price: 59.99,
-//   },
-// ];
-
 const activeTab = ref('0');
 let currentTab = ref('all');
-const config = useRuntimeConfig();
 
-const {
-  data: products,
-  pending,
-  error,
-} = await useFetch(`/api/v1/products/new-arrivals`, {
-  query: { option: computed(() => currentTab.value) },
-  baseURL: config.public.apiBase,
-  credentials: 'include',
-
-  transform: response => {
-    return response.data.products.map(product => {
-      const firstImage = product.images?.[0];
-      return {
-        name: product.name,
-        price: product.price,
-        image: firstImage?.url || '',
-        alt: firstImage?.altText || product.name,
-      };
-    });
-  },
-});
-
-async function onTabChange() {
+function onTabChange() {
   switch (activeTab.value) {
     case '0':
       currentTab.value = 'all';
@@ -185,5 +116,7 @@ async function onTabChange() {
     default:
       break;
   }
+
+  emit('tabChanged', currentTab.value);
 }
 </script>

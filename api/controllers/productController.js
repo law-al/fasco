@@ -126,7 +126,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
 });
 
 exports.getFeatured = asyncErrorHandler(async (req, res) => {
-  const products = await Product.find({ isFeatured: true });
+  const products = await Product.find({ isFeatured: true, isActive: true }).populate('category');
 
   res.status(StatusCodes.OK).json({
     status: 'success',
