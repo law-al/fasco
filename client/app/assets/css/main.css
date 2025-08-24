@@ -1,8 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Corinthia:wght@400;700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Corinthia:wght@400;700&family=Monoton&family=Orbitron:wght@400..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&family=Ribeye&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
 @theme inline {
   --font-primary: 'Tinos', serif;
   --font-secondary: 'Corinthia', cursive;
+  --font-public: 'Public Sans', sans-serif;
+  --font-monoton: 'Monoton', sans-serif;
+  --font-ribeye: 'Ribeye', serif;
+  --font-orbitron: 'Orbitron', sans-serif;
 }

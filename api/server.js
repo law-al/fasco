@@ -1,6 +1,6 @@
 require('dotenv').config({ path: './config.env' });
 const mongoose = require('mongoose');
-const scheduleCartCleanUp = require('./utils/scheduleCartCleanUp');
+const { scheduleCartCleanUp, scheduleExpiredDealsCleanUp } = require('./utils/cronJobs');
 
 process.on('unhandledRejection', err => {
   console.log(err.message);
@@ -28,5 +28,6 @@ const connectDb = async () => {
 app.listen(port, async () => {
   await connectDb();
   await scheduleCartCleanUp(); //cron service
+  await scheduleExpiredDealsCleanUp();
   console.log('server started');
 });

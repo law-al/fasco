@@ -9,37 +9,71 @@
           <div class="ml-[170px] w-[400px] relative">
             <transition name="fade" mode="out-in">
               <!-- Nav -->
-              <ul v-if="!isSearchOpen" class="flex items-center justify-between w-full absolute -top-3">
+              <ul
+                v-if="!isSearchOpen"
+                class="flex items-center justify-between w-full absolute -top-3"
+              >
                 <li v-for="nav in navItems" :key="navItems.name">
-                  <u-link as="button" active-class="font-semibold" inactive-class="text-muted" :to="nav.route" class="text-xl text-gray-600 mb-1 border-b border-b-transparent">{{ nav.name }}</u-link>
+                  <u-link
+                    as="button"
+                    active-class="font-semibold"
+                    inactive-class="text-muted"
+                    :to="nav.route"
+                    class="text-xl text-gray-600 mb-1 border-b border-b-transparent"
+                    >{{ nav.name }}</u-link
+                  >
                 </li>
               </ul>
 
               <!-- Search input -->
-              <div v-else class="w-full flex items-center border-b-2 border-gray-400 absolute -top-4">
+              <div
+                v-else
+                class="w-full flex items-center border-b-2 border-gray-400 absolute -top-4"
+              >
                 <input
                   id="search"
-                  :class="cn('w-full bg-white  flex h-[35px] appearance-none items-center px-[2px] text-sm leading-none outline-none selection:color-white selection:bg-blackA9')"
+                  :class="
+                    cn(
+                      'w-full bg-white  flex h-[35px] appearance-none items-center px-[2px] text-sm leading-none outline-none selection:color-white selection:bg-blackA9'
+                    )
+                  "
                   type="search"
                   placeholder="Search"
                   v-model="search"
                 />
 
                 <!-- Close search -->
-                <u-icon name="i-material-symbols-light-close" class="size-5 cursor-pointer" @click="toggleSearch('close')" />
+                <u-icon
+                  name="i-material-symbols-light-close"
+                  class="size-5 cursor-pointer"
+                  @click="toggleSearch('close')"
+                />
               </div>
             </transition>
           </div>
 
           <!-- Buttons -->
           <div class="flex items-center gap-3">
-            <u-icon name="i-material-symbols-light-search" class="size-7 text-black cursor-pointer" @click="toggleSearch" />
+            <u-icon
+              name="i-material-symbols-light-search"
+              class="size-7 text-black cursor-pointer"
+              @click="toggleSearch"
+            />
             <u-icon name="i-circum-user" class="size-7 text-black cursor-pointer" />
             <u-icon name="i-iconamoon-star-thin" class="size-7 text-black cursor-pointer" />
             <USlideover title="Cart">
               <div class="relative">
-                <u-icon label="Open" name="i-mdi-light-cart" class="size-7 text-black cursor-pointer" />
-                <p label="Open" class="absolute top-0 -right-1 w-5 h-5 text-sm border border-black flex items-center justify-center rounded-full text-white bg-black cursor-pointer">20</p>
+                <u-icon
+                  label="Open"
+                  name="i-mdi-light-cart"
+                  class="size-7 text-black cursor-pointer"
+                />
+                <p
+                  label="Open"
+                  class="absolute top-0 -right-1 w-5 h-5 text-sm border border-black flex items-center justify-center rounded-full text-white bg-black cursor-pointer"
+                >
+                  20
+                </p>
               </div>
 
               <template #body>
@@ -57,7 +91,9 @@
   <main>
     <slot />
   </main>
-  <footer class="w-full h-[100px] flex flex-col justify-center border-t-2 border-gray-500 font-primary px-8">
+  <footer
+    class="w-full h-[100px] flex flex-col justify-center border-t-2 border-gray-300 font-primary px-8"
+  >
     <div class="flex items-center justify-between">
       <div class="">
         <nuxt-link to="/" class="text-3xl font-secondary block">Fasco</nuxt-link>

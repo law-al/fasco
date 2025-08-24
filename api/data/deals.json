@@ -1,0 +1,19 @@
+{
+  "products": [
+    "68a8bbd712c3ef74a03ed8ae",
+    "68a8bbd712c3ef74a03ed8b1",
+    "68a8bbd712c3ef74a03ed8b7",
+    "68a8bbd712c3ef74a03ed8ba",
+    "68a8bbd712c3ef74a03ed8bd",
+    "68a8bbd712c3ef74a03ed8c0",
+    "68a8bbd712c3ef74a03ed8c3"
+  ],
+  "dealType": "deal-of-month",
+  "title": "Men's Comfort Pack",
+  "description": "Upgrade your casual wardrobe with our monthly essentials. Cotton polo shirts, casual hoodies, denim jeans, and comfortable henley shirts - all at 25% off this week!",
+  "discountPercentage": 25,
+  "startDate": "2025-08-18T00:00:00.000Z",
+  "endDate": "2025-08-24T23:59:59.999Z",
+  "isActive": true,
+  "priority": 2
+}
