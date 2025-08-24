@@ -19,17 +19,16 @@ exports.addProduct = asyncErrorHandler(async (req, res) => {
 
 exports.getAllProducts = asyncErrorHandler(async (req, res) => {
   const { slug, brand, material, size, gender, color, priceLevel, search, sort } = req.query;
+  const queryObj = {};
 
   if (slug) {
     const category = await Category.findOne({ slug });
+
     if (category) {
       queryObj.category = category._id;
     }
   }
 
-  console.log(slug);
-
-  const queryObj = {};
   if (brand) {
     queryObj.brand = brand;
   }
@@ -51,7 +50,6 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
   }
 
   if (priceLevel) {
-    console.log(priceLevel);
     switch (priceLevel) {
       case 'budget':
         queryObj.price = { $gt: 0, $lte: 50 };
@@ -81,6 +79,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
   }
 
   const results = Product.find(queryObj).populate('category', '-createdAt').lean();
+  const count = await Product.find(queryObj).countDocuments();
 
   const sortObj = {};
   if (sort) {
@@ -100,7 +99,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
 
   results.sort(sortObj);
 
-  const limit = +req.query?.limit || 5;
+  const limit = +req.query?.limit || 12;
   const page = +req.query?.page || 1;
   const skip = (page - 1) * limit;
 
@@ -119,6 +118,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({
     status: 'success',
     length: products.length,
+    count,
     data: {
       products,
     },

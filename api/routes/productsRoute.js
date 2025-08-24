@@ -22,7 +22,7 @@ router.route('/add-category').post(protect, checkRole('admin'), addCategory);
 // ==========================================
 // PRODUCT
 // ==========================================
-router.route('/get-all-products').get(getAllProducts);
+router.route('/products').get(getAllProducts);
 router.route('/featured-products').get(getFeatured);
 router.route('/get-product/:productId').get(getProduct);
 router.route('/deals-of-the-month').get(getAllDealsOfTheMonth);
