@@ -2,7 +2,9 @@
   <header class="font-primary">
     <div class="w-[1200px] h-[100px] mx-auto flex items-center gap-20">
       <div class="text-7xl">
-        <nuxt-link href="/" class="block font-secondary text-7xl">Fasco</nuxt-link>
+        <nuxt-link href="/" class="block font-secondary text-7xl"
+          >Fasco</nuxt-link
+        >
       </div>
       <div class="flex items-center justify-between w-full gap-5">
         <div class="w-full flex items-center justify-between">
@@ -59,8 +61,14 @@
               class="size-7 text-black cursor-pointer"
               @click="toggleSearch"
             />
-            <u-icon name="i-circum-user" class="size-7 text-black cursor-pointer" />
-            <u-icon name="i-iconamoon-star-thin" class="size-7 text-black cursor-pointer" />
+            <u-icon
+              name="i-circum-user"
+              class="size-7 text-black cursor-pointer"
+            />
+            <u-icon
+              name="i-iconamoon-star-thin"
+              class="size-7 text-black cursor-pointer"
+            />
             <USlideover title="Cart">
               <div class="relative">
                 <u-icon
@@ -69,10 +77,11 @@
                   class="size-7 text-black cursor-pointer"
                 />
                 <p
+                  v-if="cartStore.cart"
                   label="Open"
                   class="absolute top-0 -right-1 w-5 h-5 text-sm border border-black flex items-center justify-center rounded-full text-white bg-black cursor-pointer"
                 >
-                  20
+                  {{ cartStore.cart?.items?.length || 0 }}
                 </p>
               </div>
 
@@ -84,7 +93,12 @@
         </div>
 
         <!-- Login -->
-        <u-button to="/auth/login" size="xl" class="px-6 !bg-black cursor-pointer">Login</u-button>
+        <u-button
+          to="/auth/login"
+          size="xl"
+          class="px-6 !bg-black cursor-pointer"
+          >Login</u-button
+        >
       </div>
     </div>
   </header>
@@ -96,7 +110,9 @@
   >
     <div class="flex items-center justify-between">
       <div class="">
-        <nuxt-link to="/" class="text-3xl font-secondary block">Fasco</nuxt-link>
+        <nuxt-link to="/" class="text-3xl font-secondary block"
+          >Fasco</nuxt-link
+        >
       </div>
 
       <ul class="flex items-center gap-5">
@@ -127,8 +143,20 @@
 
 <script setup>
 import { useRouteQuery } from '@vueuse/router';
-import { fa } from 'zod/locales';
+/* ------------------------------
+   Pinia
+--------------------------------*/
+const cartStore = useCartStore();
+
+/* ------------------------------
+    State
+--------------------------------*/
 const search = useRouteQuery('search', '');
+const isSearchOpen = ref(false);
+
+/* ------------------------------
+    Derived Data
+--------------------------------*/
 const navItems = [
   {
     name: 'Home',
@@ -147,8 +175,10 @@ const navItems = [
     route: '/contact',
   },
 ];
-const isSearchOpen = ref(false);
 
+/* ------------------------------
+   Function
+--------------------------------*/
 function toggleSearch(val) {
   if (val === 'close') {
     isSearchOpen.value = false;

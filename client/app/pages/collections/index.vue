@@ -194,7 +194,7 @@
               v-else-if="products.length <= 0"
               class="w-full h-[550px] flex flex-col items-center justify-center"
             >
-              <p class="text-2xl mb-4">No product Found</p>
+              <p class="text-2xl mb-4">No Product Found</p>
               <UButton
                 variant="ghost"
                 class="text-orange-400"
@@ -260,6 +260,9 @@ const selectedValue = ref({
   slug: '',
   page: 1,
 });
+
+// Add a flag to prevent circular updates
+const isUpdating = ref(false);
 
 const sortItems = ref([
   { label: 'Price Ascending', id: 'priceAsc' },
@@ -372,31 +375,51 @@ function handleBookmark() {
 }
 
 /* -------------------------------------------------------
- 🟢 6. Watchers
+ 🟢 6. Watchers - FIXED
 ------------------------------------------------------- */
-// sync: route.query → selectedValue
+// sync: route.query → selectedValue (only when route changes externally)
 watch(
   () => route.query,
   newValue => {
-    selectedValue.value = {
-      ...selectedValue.value,
-      ...normalizeQuery(newValue),
-    };
+    if (!isUpdating.value) {
+      isUpdating.value = true;
+
+      selectedValue.value = {
+        ...selectedValue.value,
+        ...normalizeQuery(newValue),
+      };
+      // Fetch products when route changes externally (like browser back/forward)
+      productStore.fetchProducts(newValue);
+      nextTick(() => {
+        isUpdating.value = false;
+      });
+    }
   }
 );
 
-// sync: selectedValue → route.query + fetch products
+// sync: selectedValue → route.query + fetch products (only when selectedValue changes internally)
 watch(
   selectedValue,
   async newValue => {
-    const queryObj = {};
-    Object.keys(newValue).forEach(key => {
-      if (newValue[key]) {
-        queryObj[key] = newValue[key];
-      }
-    });
-    router.push({ query: queryObj });
-    await productStore.fetchProducts(route.query);
+    if (!isUpdating.value) {
+      const queryObj = {};
+      Object.keys(newValue).forEach(key => {
+        if (newValue[key]) {
+          queryObj[key] = newValue[key];
+        }
+      });
+
+      // Update URL without triggering route watcher
+      isUpdating.value = true;
+      await router.push({ query: queryObj });
+
+      // Fetch products
+      await productStore.fetchProducts(queryObj);
+
+      nextTick(() => {
+        isUpdating.value = false;
+      });
+    }
   },
   { deep: true }
 );
@@ -411,6 +434,7 @@ onMounted(async () => {
       ...normalizeQuery(route.query),
     };
   }
+  // Initial fetch
   await productStore.fetchProducts(route.query);
 });
 </script>

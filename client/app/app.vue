@@ -8,5 +8,9 @@
 </template>
 
 <script setup>
-const isLoading = ref(false);
+const cartStore = useCartStore();
+
+onMounted(() => {
+  cartStore.intializeCart();
+});
 </script>

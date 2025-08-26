@@ -1,5 +1,6 @@
 export const useProductStore = defineStore('products', () => {
   const products = ref([]);
+  const product = ref(null);
   const count = ref(0);
   const pending = ref(false);
   const error = ref(null);
@@ -10,6 +11,7 @@ export const useProductStore = defineStore('products', () => {
     try {
       pending.value = true;
       error.value = null;
+      products.value = [];
 
       const response = await $fetch('api/v1/products/products', {
         baseURL: config.public.apiBase,
@@ -36,6 +38,7 @@ export const useProductStore = defineStore('products', () => {
 
   return {
     products,
+    product,
     count,
     pending,
     error,

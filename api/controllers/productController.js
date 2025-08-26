@@ -4,6 +4,7 @@ const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
 const Category = require('../models/categoryModel');
 const Deal = require('../models/dealsModel');
+const { default: mongoose } = require('mongoose');
 
 exports.addProduct = asyncErrorHandler(async (req, res) => {
   const product = await Product.create(req.body);
@@ -137,8 +138,20 @@ exports.getFeatured = asyncErrorHandler(async (req, res) => {
   });
 });
 
+function isValidObjectId(id) {
+  // console.log(mongoose.Types.ObjectId.isValid(id));
+  // console.log(/^[0-9a-fA-F]{24}$/.test(id));
+  return mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
+}
+
 exports.getProduct = asyncErrorHandler(async (req, res) => {
-  const product = await Product.findById(req.params.productId);
+  console.log(req.params);
+  const product = await Product.findOne({
+    $or: [
+      isValidObjectId(req.params.productId) ? { _id: req.params.productId } : null,
+      { name: req.params.productId.split('-').join(' ') },
+    ].filter(Boolean),
+  });
 
   if (!product) throw new CustomError('No product found', StatusCodes.NOT_FOUND);
 
