@@ -6,7 +6,7 @@ const CustomError = require('../utils/CustomError');
 const Product = require('../models/productModel');
 const mongoose = require('mongoose');
 
-const checkAndUpdateInventory = async (product, productId, sku, color, size, quantity, session) => {
+const checkAndUpdateInventory = async (product, productId, sku, quantity, session) => {
   const productInInventory = product.inventory.find(val => val.sku === sku);
   if (!productInInventory || productInInventory.quantity === 0)
     throw new CustomError('Product does not exist in inventory', StatusCodes.NOT_FOUND);
@@ -161,7 +161,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
               { $inc: { 'inventory.$.quantity': Math.abs(quantityDiff) } },
               { session }
             );
-          }
+          } else if (quantityDiff === 0) throw new CustomError('Item already in cart', StatusCodes.BAD_REQUEST);
 
           cart.items[productInCartIndex].quantity = Number(quantity);
         } else {
@@ -265,7 +265,8 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
               { $inc: { 'inventory.$.quantity': Math.abs(quantityDiff) } },
               { session }
             );
-          }
+          } else if (quantityDiff === 0) throw new CustomError('Item already in cart', StatusCodes.BAD_REQUEST);
+
           cart.items[productInCartIndex].quantity = Number(quantity);
         } else {
           await checkAndUpdateInventory(product, productId, sku, Number(quantity), session);

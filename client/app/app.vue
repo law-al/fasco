@@ -1,5 +1,6 @@
 <template>
   <u-app>
+    <nuxt-loading-indicator />
     <nuxt-layout>
       <nuxt-page />
     </nuxt-layout>
@@ -7,5 +8,9 @@
 </template>
 
 <script setup>
-  const isLoading = ref(false);
+const cartStore = useCartStore();
+
+onMounted(() => {
+  cartStore.intializeCart();
+});
 </script>

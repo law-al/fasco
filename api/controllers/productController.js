@@ -3,6 +3,8 @@ const Product = require('../models/productModel');
 const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
 const Category = require('../models/categoryModel');
+const Deal = require('../models/dealsModel');
+const { default: mongoose } = require('mongoose');
 
 exports.addProduct = asyncErrorHandler(async (req, res) => {
   const product = await Product.create(req.body);
@@ -17,28 +19,17 @@ exports.addProduct = asyncErrorHandler(async (req, res) => {
 });
 
 exports.getAllProducts = asyncErrorHandler(async (req, res) => {
-  const {
-    slug,
-    brand,
-    material,
-    size,
-    gender,
-    color,
-    priceLevel,
-    search,
-    sort,
-  } = req.query;
+  const { slug, brand, material, size, gender, color, priceLevel, search, sort } = req.query;
+  const queryObj = {};
 
   if (slug) {
     const category = await Category.findOne({ slug });
+
     if (category) {
       queryObj.category = category._id;
     }
   }
 
-  console.log(slug);
-
-  const queryObj = {};
   if (brand) {
     queryObj.brand = brand;
   }
@@ -60,7 +51,6 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
   }
 
   if (priceLevel) {
-    console.log(priceLevel);
     switch (priceLevel) {
       case 'budget':
         queryObj.price = { $gt: 0, $lte: 50 };
@@ -89,9 +79,8 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
     queryObj.$text = { $search: search.replace(/-/g, ' ') };
   }
 
-  const results = Product.find(queryObj)
-    .populate('category', '-createdAt')
-    .lean();
+  const results = Product.find(queryObj).populate('category', '-createdAt').lean();
+  const count = await Product.find(queryObj).countDocuments();
 
   const sortObj = {};
   if (sort) {
@@ -111,7 +100,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
 
   results.sort(sortObj);
 
-  const limit = +req.query?.limit || 5;
+  const limit = +req.query?.limit || 12;
   const page = +req.query?.page || 1;
   const skip = (page - 1) * limit;
 
@@ -130,6 +119,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({
     status: 'success',
     length: products.length,
+    count,
     data: {
       products,
     },
@@ -137,7 +127,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
 });
 
 exports.getFeatured = asyncErrorHandler(async (req, res) => {
-  const products = await Product.find({ isFeatured: true });
+  const products = await Product.find({ isFeatured: true, isActive: true }).populate('category');
 
   res.status(StatusCodes.OK).json({
     status: 'success',
@@ -148,16 +138,139 @@ exports.getFeatured = asyncErrorHandler(async (req, res) => {
   });
 });
 
-exports.getProduct = asyncErrorHandler(async (req, res) => {
-  const product = await Product.findById(req.params.productId);
+function isValidObjectId(id) {
+  // console.log(mongoose.Types.ObjectId.isValid(id));
+  // console.log(/^[0-9a-fA-F]{24}$/.test(id));
+  return mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
+}
 
-  if (!product)
-    throw new CustomError('No product found', StatusCodes.NOT_FOUND);
+exports.getProduct = asyncErrorHandler(async (req, res) => {
+  console.log(req.params);
+  const product = await Product.findOne({
+    $or: [
+      isValidObjectId(req.params.productId) ? { _id: req.params.productId } : null,
+      { name: req.params.productId.split('-').join(' ') },
+    ].filter(Boolean),
+  });
+
+  if (!product) throw new CustomError('No product found', StatusCodes.NOT_FOUND);
 
   res.status(StatusCodes.OK).json({
     status: 'success',
     data: {
       product,
     },
+  });
+});
+
+exports.getNewArrivals = asyncErrorHandler(async (req, res) => {
+  const { option } = req.query;
+  let products;
+
+  if (option === 'all') {
+    products = await Product.find({ isActive: true }).sort({ createdAt: 1 }).limit(6);
+  } else {
+    products = await Product.find({ isActive: true })
+      .populate({
+        path: 'category',
+        match: {
+          slug: {
+            $regex: `^${option}`,
+            $options: 'i',
+          },
+        },
+      })
+      .sort({ createdAt: 1 });
+
+    products = products.filter(product => product.category.length > 0).splice(0, 6);
+  }
+
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    data: {
+      products,
+    },
+  });
+});
+
+//  Deals
+
+exports.checkExpiredDeals = async () => {
+  try {
+    const expiredDeals = await Deal.updateMany(
+      { isActive: true, endDate: { $lt: new Date() } },
+      {
+        $set: { isActive: false },
+      }
+    );
+
+    if (expiredDeals.length) {
+      console.log(`${expiredDeals.length} deal is set to inActive`);
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+exports.getAllDealsOfTheMonth = asyncErrorHandler(async (req, res) => {
+  // await checkExpiredDeals();
+  const deals = await Deal.find({
+    dealType: 'deal-of-month',
+    isActive: true,
+    startDate: { $lte: new Date() },
+    endDate: { $gte: new Date() },
+  })
+    .populate({
+      path: 'products',
+      match: { isActive: true },
+    })
+    .sort({ priority: -1 })
+    .lean(); // return plain object instead of mongoose document
+
+  if (deals?.length === 0) {
+    return res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'No deals found',
+      data: {
+        deals,
+      },
+    });
+  }
+
+  // because .populate returns product that is match, it also returns product that does match, by setting it to null
+
+  const dealResponse = deals
+    .filter(deal => deal.products && deal.products.length > 0)
+    .map(deal => {
+      const productsWithDiscounts = deal.products.map(product => ({
+        ...product,
+        discountPrice: product.price - (product.price * deal.discountPercentage) / 100,
+      }));
+
+      return {
+        products: productsWithDiscounts,
+        dealType: deal.dealType,
+        title: deal.title,
+        description: deal.description,
+        discountPercentage: deal.discountPercentage,
+        endDate: deal.endDate,
+      };
+    });
+
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    data: {
+      deals: dealResponse,
+    },
+  });
+});
+
+exports.addDeals = asyncErrorHandler(async (req, res) => {
+  await Deal.create(req.body);
+
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    message: 'Deal successfully created',
   });
 });

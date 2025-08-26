@@ -66,9 +66,7 @@ const productSchema = new mongoose.Schema(
         message: 'Sale price cannot exceed regular price',
       },
     },
-    category: [
-      { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-    ], // should in case something changes in the category schema, it automatically updates
+    category: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true }], // should in case something changes in the category schema, it automatically updates
     brand: {
       type: String,
       lowercase: true,
