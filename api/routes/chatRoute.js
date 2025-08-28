@@ -12,6 +12,8 @@ const openai = new OpenAI({
 
 router.post('/', async (req, res) => {
   const { prompt } = req.body;
+
+  console.log('Received prompt:', prompt);
   try {
     let input = [
       {
@@ -165,7 +167,7 @@ Rules:
 
     res.json({
       status: 'success',
-      answer: parsedResponse,
+      data: parsedResponse,
     });
   } catch (error) {
     console.log('Error details:', error);
