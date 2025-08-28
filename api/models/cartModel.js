@@ -13,12 +13,13 @@ const cartItemSchema = new mongoose.Schema(
     sku: String,
     color: String,
     size: String,
-    iamge: String,
+    image: String,
     quantity: {
       type: Number,
       required: true,
       min: 1,
     },
+    maxQuantity: Number,
     priceAtTimeAdded: {
       type: Number,
       required: true,

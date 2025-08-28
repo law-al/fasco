@@ -12,6 +12,7 @@ const userRouter = require('./routes/userRoute');
 const productsRouter = require('./routes/productsRoute');
 const cartRouter = require('./routes/cartRoute');
 const couponRouter = require('./routes/couponRoute');
+const chatRouter = require('./routes/chatRoute');
 
 const CustomError = require('./utils/CustomError');
 
@@ -49,9 +50,6 @@ app.use(
   })
 );
 
-console.log('USER_SESSION_MAX_AGE:', +process.env.GUEST_SESSION_MAX_AGE);
-console.log('Type:', typeof +process.env.GUEST_SESSION_MAX_AGE);
-
 // ==========================================
 // ROUTE MIDDLEWARE
 // ==========================================
@@ -60,6 +58,7 @@ app.use('/api/v1/user', userRouter);
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/coupon', couponRouter);
+app.use('/api/v1/chat', chatRouter);
 
 // ==========================================
 // UNHANDLED ROUTES

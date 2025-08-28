@@ -7,7 +7,7 @@ export const useProductStore = defineStore('products', () => {
 
   const config = useRuntimeConfig();
 
-  async function fetchProducts(query) {
+  async function fetchProducts(query = {}) {
     try {
       pending.value = true;
       error.value = null;

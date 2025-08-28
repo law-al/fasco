@@ -131,6 +131,7 @@
 
               <u-button
                 variant="ghost"
+                :disabled="quantity >= maxQuantity"
                 class="px-3 py-2 h-10 w-10 hover:bg-gray-100 transition-colors border-0 rounded-none flex items-center justify-center"
                 @click="increaseQuantity"
               >
@@ -257,6 +258,16 @@ const colorMap = {
 };
 
 /* ------------------------------
+   Computed
+--------------------------------*/
+const maxQuantity = computed(
+  () =>
+    product.value.inventory.find(
+      inventory => inventory.size === selectedSize.value
+    ).quantity
+);
+
+/* ------------------------------
    Methods - Product
 --------------------------------*/
 function selectSize(size) {
@@ -292,27 +303,20 @@ async function addToCart() {
     quantity: quantity.value,
   };
 
-  console.log('Add to cart payload:', body);
+  await cartStore.addToCart(body);
 
-  try {
-    await cartStore.addToCart(body);
+  if (isComponentMounted.value && !error.value) {
+    toast.add({
+      title: 'Item added to cart',
+      description: 'Item has been added to cart successfully',
+    });
+  }
 
-    // Only show toast if component is still mounted and no error
-    if (isComponentMounted.value && !error.value) {
-      toast.add({
-        title: 'Item added to cart',
-        description: 'Item has been added to cart successfully',
-      });
-    }
-  } catch (err) {
-    console.error('Error adding to cart:', err);
-    if (isComponentMounted.value) {
-      toast.add({
-        title: 'Error',
-        description: 'Failed to add item to cart',
-        color: 'red',
-      });
-    }
+  if (cartStore.error) {
+    toast.add({
+      title: 'Error adding to cart',
+      description: cartStore.error,
+    });
   }
 }
 
@@ -326,7 +330,7 @@ function decreaseQuantity() {
 
 function increaseQuantity() {
   if (!isComponentMounted.value) return;
-  quantity.value++;
+  if (quantity.value < maxQuantity.value) quantity.value++;
 }
 
 /* ------------------------------

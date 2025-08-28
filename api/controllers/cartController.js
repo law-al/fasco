@@ -8,8 +8,7 @@ const mongoose = require('mongoose');
 
 const checkAndUpdateInventory = async (product, productId, sku, quantity, session) => {
   const productInInventory = product.inventory.find(val => val.sku === sku);
-  if (!productInInventory || productInInventory.quantity === 0)
-    throw new CustomError('Product does not exist in inventory', StatusCodes.NOT_FOUND);
+  if (!productInInventory || productInInventory.quantity === 0) throw new CustomError('Product does not exist in inventory', StatusCodes.NOT_FOUND);
 
   // Atomically check and decrement inventory in one operation
   const updatedProduct = await Product.findOneAndUpdate(
@@ -112,9 +111,10 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
           name: product.name,
           color: product.inventory.find(item => item.sku === sku).color,
           size: product.inventory.find(item => item.sku === sku).size,
-          image: product.images.find(image => image.isPrimary === true).url,
+          image: product.images.find(image => image.isPrimary === true).url || product.images[0].url,
           sku,
           quantity: Number(quantity),
+          maxQuantity: product.inventory.find(item => item.sku === sku).quantity,
           priceAtTimeAdded: product.salesPrice || product.price,
         };
 
@@ -156,11 +156,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
             await checkAndUpdateInventory(product, productId, sku, quantityDiff, session);
           } else if (quantityDiff < 0) {
             // Return items to inventory
-            await Product.updateOne(
-              { _id: productId, 'inventory.sku': sku },
-              { $inc: { 'inventory.$.quantity': Math.abs(quantityDiff) } },
-              { session }
-            );
+            await Product.updateOne({ _id: productId, 'inventory.sku': sku }, { $inc: { 'inventory.$.quantity': Math.abs(quantityDiff) } }, { session });
           } else if (quantityDiff === 0) throw new CustomError('Item already in cart', StatusCodes.BAD_REQUEST);
 
           cart.items[productInCartIndex].quantity = Number(quantity);
@@ -172,9 +168,10 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
             name: product.name,
             color: product.inventory.find(item => item.sku === sku).color,
             size: product.inventory.find(item => item.sku === sku).size,
-            image: product.images.find(image => image.isPrimary === true).url,
+            image: product.images.find(image => image.isPrimary === true).url || product.images[0].url,
             sku,
             quantity: Number(quantity),
+            maxQuantity: product.inventory.find(item => item.sku === sku).quantity,
             priceAtTimeAdded: product.salesPrice || product.price,
           });
         }
@@ -214,9 +211,10 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
           name: product.name,
           color: product.inventory.find(item => item.sku === sku).color,
           size: product.inventory.find(item => item.sku === sku).size,
-          image: product.images.find(image => image.isPrimary === true).url,
+          image: product.images.find(image => image.isPrimary === true).url || product.images[0].url,
           sku,
           quantity: Number(quantity),
+          maxQuantity: product.inventory.find(item => item.sku === sku).quantity,
           priceAtTimeAdded: product.salesPrice || product.price,
         };
 
@@ -260,11 +258,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
             await checkAndUpdateInventory(product, productId, sku, quantityDiff, session);
           } else if (quantityDiff < 0) {
             // Return items to inventory
-            await Product.updateOne(
-              { _id: productId, 'inventory.sku': sku },
-              { $inc: { 'inventory.$.quantity': Math.abs(quantityDiff) } },
-              { session }
-            );
+            await Product.updateOne({ _id: productId, 'inventory.sku': sku }, { $inc: { 'inventory.$.quantity': Math.abs(quantityDiff) } }, { session });
           } else if (quantityDiff === 0) throw new CustomError('Item already in cart', StatusCodes.BAD_REQUEST);
 
           cart.items[productInCartIndex].quantity = Number(quantity);
@@ -275,9 +269,10 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
             name: product.name,
             color: product.inventory.find(item => item.sku === sku).color,
             size: product.inventory.find(item => item.sku === sku).size,
-            image: product.images.find(image => image.isPrimary === true).url,
+            image: product.images.find(image => image.isPrimary === true).url || product.images[0].url,
             sku,
             quantity: Number(quantity),
+            maxQuantity: product.inventory.find(item => item.sku === sku).quantity,
             priceAtTimeAdded: product.salesPrice || product.price,
           });
         }
@@ -372,11 +367,7 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
       const itemIndex = cart.items.findIndex(item => item.sku === sku);
 
       if (itemIndex > -1) {
-        await Product.findOneAndUpdate(
-          { _id: cart.items[itemIndex].productId, 'inventory.sku': sku },
-          { $inc: { 'inventory.$.quantity': cart.items[itemIndex].quantity } },
-          { session }
-        );
+        await Product.findOneAndUpdate({ _id: cart.items[itemIndex].productId, 'inventory.sku': sku }, { $inc: { 'inventory.$.quantity': cart.items[itemIndex].quantity } }, { session });
         cart.items.splice(itemIndex, 1);
         cart.totalPrice = cart.items.reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0).toFixed(2);
         await cart.save({ session });
@@ -384,7 +375,7 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
         res.status(StatusCodes.OK).json({
           status: 'success',
           message: 'item deleted successfully',
-          cart,
+          data: { cart },
         });
 
         req.session.user = { cart };
@@ -403,11 +394,7 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
       const itemIndex = cart.items.findIndex(item => item.sku === sku);
 
       if (itemIndex > -1) {
-        await Product.findOneAndUpdate(
-          { _id: cart.items[itemIndex].productId, 'inventory.sku': sku },
-          { $inc: { 'inventory.$.quantity': cart.items[itemIndex].quantity } },
-          { session }
-        );
+        await Product.findOneAndUpdate({ _id: cart.items[itemIndex].productId, 'inventory.sku': sku }, { $inc: { 'inventory.$.quantity': cart.items[itemIndex].quantity } }, { session });
         cart.items.splice(itemIndex, 1);
         cart.totalPrice = cart.items.reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0).toFixed(2);
         await cart.save({ session });
@@ -418,7 +405,7 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
         res.status(StatusCodes.OK).json({
           status: 'success',
           message: 'item deleted successfully',
-          cart,
+          data: { cart },
         });
 
         await session.commitTransaction();
@@ -454,10 +441,7 @@ exports.mergeCart = asyncErrorHandler(async (req, res) => {
     //loop through guest cart
     if (guestCart && userCart) {
       for (const guestCartItem of guestCart.items) {
-        const existingItemIndex = userCart.items.findIndex(
-          item =>
-            item.sku === guestCartItem.sku && item.color === guestCartItem.color && item.size === guestCartItem.size
-        );
+        const existingItemIndex = userCart.items.findIndex(item => item.sku === guestCartItem.sku && item.color === guestCartItem.color && item.size === guestCartItem.size);
 
         if (existingItemIndex > -1) {
           // item exist in user cart
@@ -466,9 +450,7 @@ exports.mergeCart = asyncErrorHandler(async (req, res) => {
           userCart.items.push(guestCartItem);
         }
       }
-      userCart.totalPrice = userCart.items
-        .reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0)
-        .toFixed(2);
+      userCart.totalPrice = userCart.items.reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0).toFixed(2);
       await userCart.save({ session });
 
       await Cart.findOneAndDelete({ guestId });

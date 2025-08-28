@@ -211,7 +211,7 @@
               <div class="grid grid-cols-4 gap-6">
                 <ProductCard
                   v-for="product in products"
-                  :key="product.name"
+                  :key="product._id"
                   :product="product"
                 />
               </div>
@@ -234,13 +234,6 @@
 
 <script setup>
 /* -------------------------------------------------------
- 🟢 1. Page Meta
-------------------------------------------------------- */
-definePageMeta({
-  layout: 'default',
-});
-
-/* -------------------------------------------------------
  🟢 2. Router + Store
 ------------------------------------------------------- */
 const route = useRoute();
@@ -258,6 +251,7 @@ const selectedValue = ref({
   brand: '',
   material: '',
   slug: '',
+  sort: '',
   page: 1,
 });
 

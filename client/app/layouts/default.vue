@@ -62,14 +62,16 @@
               @click="toggleSearch"
             />
             <u-icon
+              v-if="userStore.user"
               name="i-circum-user"
               class="size-7 text-black cursor-pointer"
             />
             <u-icon
+              v-if="userStore.user"
               name="i-iconamoon-star-thin"
               class="size-7 text-black cursor-pointer"
             />
-            <USlideover title="Cart">
+            <USlideover title="Cart" class="!p-2">
               <div class="relative">
                 <u-icon
                   label="Open"
@@ -79,14 +81,35 @@
                 <p
                   v-if="cartStore.cart"
                   label="Open"
-                  class="absolute top-0 -right-1 w-5 h-5 text-sm border border-black flex items-center justify-center rounded-full text-white bg-black cursor-pointer"
+                  class="absolute top-0 -right-1 w-5 h-5 text-sm flex items-center justify-center rounded-full text-white bg-black cursor-pointer"
                 >
                   {{ cartStore.cart?.items?.length || 0 }}
                 </p>
               </div>
 
               <template #body>
-                <Placeholder class="h-full" />
+                <div class="flex flex-col justify-between gap-2 h-full">
+                  <div class="h-full flex flex-col gap-1 overflow-y-scroll">
+                    <CartItem
+                      v-for="cartItem in cartStore.cart.items"
+                      :key="cartItem.sku"
+                      :cart-item="cartItem"
+                      @quantity-change="handleQuantityChange"
+                      @delete-item="handleDeleteItem"
+                    />
+                  </div>
+                  <UButton
+                    v-if="cartStore.cart && cartStore.cart.items?.length > 0"
+                    size="xl"
+                    :to="
+                      userStore.user
+                        ? '/checkout'
+                        : '/auth/login?redirect=/checkout'
+                    "
+                    class="!bg-black text-white justify-center capitalize cursor-pointer text-[16px]"
+                    >Proceed to checkout</UButton
+                  >
+                </div>
               </template>
             </USlideover>
           </div>
@@ -94,6 +117,7 @@
 
         <!-- Login -->
         <u-button
+          v-if="!userStore.user"
           to="/auth/login"
           size="xl"
           class="px-6 !bg-black cursor-pointer"
@@ -143,10 +167,12 @@
 
 <script setup>
 import { useRouteQuery } from '@vueuse/router';
+import { useDebounceFn } from '@vueuse/core';
 /* ------------------------------
    Pinia
 --------------------------------*/
 const cartStore = useCartStore();
+const userStore = useUserStore();
 
 /* ------------------------------
     State
@@ -185,6 +211,28 @@ function toggleSearch(val) {
     search.value = '';
   } else {
     isSearchOpen.value = true;
+  }
+}
+const debouncedQuantityUpdate = useDebounceFn(value => {
+  cartStore.addToCart(value);
+}, 1000);
+
+function handleQuantityChange({ productId, sku, quantity }) {
+  debouncedQuantityUpdate({ productId, sku, quantity });
+}
+
+async function handleDeleteItem(sku) {
+  try {
+    await cartStore.deleteCartItem(sku);
+  } catch (error) {
+    console.error('Error deleting cart item:', error);
+    // Optionally, show a user-friendly error message here
+    toast.add({
+      title: 'Error',
+      description: 'Failed to delete item from cart. Please try again.',
+      type: 'error',
+      duration: 5000,
+    });
   }
 }
 </script>
