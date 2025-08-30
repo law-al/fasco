@@ -13,6 +13,7 @@ const productsRouter = require('./routes/productsRoute');
 const cartRouter = require('./routes/cartRoute');
 const couponRouter = require('./routes/couponRoute');
 const chatRouter = require('./routes/chatRoute');
+const orderRouter = require('./routes/orderRoute');
 
 const CustomError = require('./utils/CustomError');
 
@@ -59,6 +60,7 @@ app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/coupon', couponRouter);
 app.use('/api/v1/chat', chatRouter);
+app.use('/api/v1/order', orderRouter);
 
 // ==========================================
 // UNHANDLED ROUTES

@@ -5,6 +5,7 @@ const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
 const Product = require('../models/productModel');
 const mongoose = require('mongoose');
+const Coupon = require('../models/couponModel');
 
 const checkAndUpdateInventory = async (product, productId, sku, quantity, session) => {
   const productInInventory = product.inventory.find(val => val.sku === sku);
@@ -131,7 +132,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
           { session }
         );
 
-        req.session.user = { cart: cart[0] };
+        req.session.user.cart = { _id: cart[0]._id, itemCount: 1 };
         req.session.cookie.maxAge = +process.env.USER_SESSION_MAX_AGE;
 
         await session.commitTransaction();
@@ -184,7 +185,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
 
         await cart.save({ session });
 
-        req.session.user = { cart };
+        req.session.user.cart = { _id: cart._id, itemCount: cart.items.length };
         req.session.cookie.maxAge = +process.env.USER_SESSION_MAX_AGE;
 
         await session.commitTransaction();
@@ -233,7 +234,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
           { session }
         );
 
-        req.session.guest = { cart: cart[0] };
+        req.session.guest = { cart: { _id: cart[0]._id, itemCount: 1 } };
         req.session.cookie.maxAge = +process.env.GUEST_SESSION_MAX_AGE;
 
         await session.commitTransaction();
@@ -288,7 +289,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
 
         await cart.save({ session });
 
-        req.session.guest = { cart };
+        req.session.guest = { cart: { _id: cart._id, itemCount: cart.items.length } };
         req.session.cookie.maxAge = +process.env.GUEST_SESSION_MAX_AGE;
 
         await session.commitTransaction();
@@ -325,8 +326,8 @@ exports.getCart = asyncErrorHandler(async (req, res) => {
 
     res.status(StatusCodes.OK).json({
       status: 'success',
-      cartItemLength: cart.items.length,
-      cart,
+      items: cart.items.length,
+      data: { cart },
     });
   } else {
     const guestId = req.sessionID;
@@ -370,18 +371,32 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
         await Product.findOneAndUpdate({ _id: cart.items[itemIndex].productId, 'inventory.sku': sku }, { $inc: { 'inventory.$.quantity': cart.items[itemIndex].quantity } }, { session });
         cart.items.splice(itemIndex, 1);
         cart.totalPrice = cart.items.reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0).toFixed(2);
+
+        if (cart.appliedCoupon) {
+          const coupon = await Coupon.findOne({ name: cart.appliedCoupon.code });
+          if (coupon) {
+            // Recalculate discount
+            try {
+              const couponResult = coupon.applyCoupon(cart.totalPrice);
+              cart.appliedCoupon.discount = couponResult.discount;
+            } catch (error) {
+              // If coupon is no longer valid, remove it from cart
+              cart.appliedCoupon = null;
+            }
+          }
+        }
         await cart.save({ session });
+
+        req.session.user.cart = { _id: cart._id, itemCount: cart.items.length };
+        req.session.cookie.maxAge = +process.env.USER_SESSION_MAX_AGE;
+
+        await session.commitTransaction();
 
         res.status(StatusCodes.OK).json({
           status: 'success',
           message: 'item deleted successfully',
           data: { cart },
         });
-
-        req.session.user = { cart };
-        req.session.cookie.maxAge = +process.env.USER_SESSION_MAX_AGE;
-
-        await session.commitTransaction();
       } else {
         throw new CustomError('item not found in cart', StatusCodes.BAD_REQUEST);
       }
@@ -399,16 +414,16 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
         cart.totalPrice = cart.items.reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0).toFixed(2);
         await cart.save({ session });
 
-        req.session.guest = { cart };
+        req.session.guest = { cart: { _id: cart._id, itemCount: cart.items.length } };
         req.session.cookie.maxAge = +process.env.GUEST_SESSION_MAX_AGE;
+
+        await session.commitTransaction();
 
         res.status(StatusCodes.OK).json({
           status: 'success',
           message: 'item deleted successfully',
           data: { cart },
         });
-
-        await session.commitTransaction();
       } else {
         throw new CustomError('item not found in cart', StatusCodes.BAD_REQUEST);
       }
@@ -425,7 +440,7 @@ exports.mergeCart = asyncErrorHandler(async (req, res) => {
   // check if user is logged in
   if (!req.session.user?.token) throw new CustomError('User needs to login', StatusCodes.BAD_REQUEST);
 
-  const session = await mongoose.startSession();
+  const session = await mongoose.startSession({});
   session.startTransaction();
 
   try {
@@ -452,38 +467,44 @@ exports.mergeCart = asyncErrorHandler(async (req, res) => {
       }
       userCart.totalPrice = userCart.items.reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0).toFixed(2);
       await userCart.save({ session });
-
       await Cart.findOneAndDelete({ guestId });
-      req.session.guest = { cart: null };
 
-      res.status(StatusCodes.OK).json({
+      req.session.guest = null;
+      req.session.user.cart = { _id: userCart._id, itemCount: userCart.items.length };
+
+      await session.commitTransaction();
+
+      return res.status(StatusCodes.OK).json({
         status: 'success',
         message: 'cart merged successfully',
         data: {
           cart: userCart,
         },
       });
-
-      //   await session.commitTransaction();
     } else if (guestCart && !userCart) {
+      const userFromSession = req.session.user;
       // convert the guestCart to user cart
       guestCart.userId = user.id;
       guestCart.guestId = null;
       guestCart.expiresAt = null;
       await guestCart.save({ session });
 
-      req.session.guest = { cart: null };
-      res.status(StatusCodes.OK).json({
+      req.session.guest = null;
+      req.session.user.cart = { _id: guestCart._id, itemCount: guestCart.items.length };
+
+      await session.commitTransaction();
+
+      return res.status(StatusCodes.OK).json({
         status: 'success',
         message: 'cart merged successfully',
         data: {
           cart: guestCart,
         },
       });
-
-      //   await session.commitTransaction();
     } else if (!guestCart && userCart) {
-      res.status(StatusCodes.OK).json({
+      await session.commitTransaction();
+
+      return res.status(StatusCodes.OK).json({
         status: 'success',
         message: 'cart merged successfully',
         data: {
@@ -492,6 +513,8 @@ exports.mergeCart = asyncErrorHandler(async (req, res) => {
       });
     } else {
       // no carts exist
+      await session.commitTransaction();
+
       return res.status(StatusCodes.OK).json({
         status: 'success',
         message: 'No carts to merge',
@@ -499,10 +522,10 @@ exports.mergeCart = asyncErrorHandler(async (req, res) => {
       });
     }
   } catch (error) {
-    // await session.abortTransaction();
+    await session.abortTransaction();
     throw error;
   } finally {
-    // await session.endSession();
+    await session.endSession();
   }
 });
 

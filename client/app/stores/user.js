@@ -16,9 +16,9 @@ export const useUserStore = defineStore('user', () => {
       });
       if (response?.data?.user) user.value = response.data.user;
     } catch (err) {
-      error.value = err.message || 'An error occurred during login';
+      error.value = err.data?.message || 'An error occurred during login';
       user.value = null;
-      throw err;
+      throw err.data?.message || err;
     } finally {
       pending.value = false;
     }

@@ -32,10 +32,11 @@ exports.getAllCoupon = asyncErrorHandler(async (req, res) => {
 });
 
 exports.applyCoupon = asyncErrorHandler(async (req, res) => {
-  const { couponName } = req.body;
+  const { code } = req.body;
   const { user } = req.session;
+  if (!user || !user.token) throw new CustomError('User not logged in', StatusCodes.BAD_REQUEST);
 
-  const coupon = await Coupon.findOne({ code: couponName.toUpperCase() });
+  const coupon = await Coupon.findOne({ code: code.toUpperCase() });
 
   if (!coupon) throw new CustomError('Coupon does not exist', StatusCodes.BAD_REQUEST);
 
@@ -47,8 +48,12 @@ exports.applyCoupon = asyncErrorHandler(async (req, res) => {
 
   const couponResult = coupon.applyCoupon(totalPrice);
 
+  const couponExist = await Cart.findOne({ 'appliedCoupon.code': code });
+
+  if (couponExist) throw new CustomError('Coupon already applied', StatusCodes.BAD_REQUEST);
+
   cart.appliedCoupon = {
-    code: couponName,
+    code: code,
     discount: couponResult.discount,
     appliedAt: Date.now(),
   };

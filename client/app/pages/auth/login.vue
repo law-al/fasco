@@ -179,17 +179,21 @@ const onSubmit = handleSubmit(async values => {
 
   try {
     await userStore.loginUser(values);
+    console.log('Login User');
 
     const redirect = route.query.redirect;
     const isCheckoutRedirect = redirect === '/checkout';
 
     if (isCheckoutRedirect) {
       await handleCartMerge();
+    } else {
+      console.log('This is entered');
+      await cartStore.getCart();
     }
 
     router.replace(redirect || '/');
   } catch (error) {
-    formError.value = error?.data?.message || error?.message || 'Login failed';
+    formError.value = error || 'Login failed';
   }
 });
 </script>

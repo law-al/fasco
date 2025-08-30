@@ -1,7 +1,6 @@
 import { useStorage } from '@vueuse/core';
 
 export const useCartStore = defineStore('carts', () => {
-  // integrate AI that can help custoers add products and check for products
   const cart = ref([]);
   const pending = ref(false);
   const error = ref(null);
@@ -10,36 +9,38 @@ export const useCartStore = defineStore('carts', () => {
 
   let expiryInterval = null;
 
+  onBeforeUnmount(() => {
+    if (expiryInterval) {
+      clearInterval(expiryInterval);
+      expiryInterval = null;
+    }
+  });
+
   function intializeCart() {
     if (import.meta.client) {
       console.log('Initializing cart from localStorage');
-      // Ensure this runs only on client side
       const storedCart = localStorage.getItem('cart');
       if (storedCart) {
-        console.log('Found stored cart:', storedCart);
         const parsedCart = JSON.parse(storedCart);
-
+        console.log('Parsed cart:', parsedCart);
         if (
           parsedCart.expiresAt &&
+          parsedCart.expiresAt !== null &&
           new Date(parsedCart.expiresAt) <= new Date()
-          // cart is expired
         ) {
-          clearCart(); // a function to clear cart and localStorage
+          console.log('Stored cart is expired, clearing cart.');
+          clearCart();
           return;
         } else {
-          console.log('Cart is valid, loading cart:', parsedCart);
-          // cart is valid
+          console.log('Loaded cart from localStorage...');
           cart.value = parsedCart;
-          expiresAt.value = parsedCart.expiredsAt || null;
-
-          // Set up expiration check
+          expiresAt.value = parsedCart.expiresAt;
           setExpirationCheck(parsedCart.expiresAt);
         }
       }
     }
   }
 
-  // Function to clear cart and localStorage
   function clearCart() {
     cart.value = [];
     localStorage.removeItem('cart');
@@ -51,7 +52,7 @@ export const useCartStore = defineStore('carts', () => {
   }
 
   function setExpirationCheck(expirationTime) {
-    if (!expirationTime) return;
+    if (!expirationTime || expirationTime === null) return;
     // Clear any existing interval
     if (expiryInterval) {
       clearInterval(expiryInterval);
@@ -65,13 +66,39 @@ export const useCartStore = defineStore('carts', () => {
 
     // Check every 30 seconds
     expiryInterval = setInterval(() => {
-      console.log('Checking cart expiration at:', new Date());
-      console.log(new Date() >= expirationDate);
       if (new Date() >= expirationDate) {
         console.log('Cart expired, clearing cart.');
         clearCart();
       }
     }, checkInterval);
+  }
+
+  async function getCart() {
+    try {
+      pending.value = true;
+      error.value = null;
+
+      const response = await $fetch('api/v1/cart/get-cart', {
+        method: 'GET',
+        credentials: 'include',
+        baseURL: config.public.apiBase,
+      });
+      console.log('Getting cart from server...');
+      if (response) {
+        console.log('Fetched cart from server:', response);
+        cart.value = response.data.cart;
+        localStorage.setItem('cart', JSON.stringify(response.data.cart));
+        expiresAt.value = response.data.cart.expiresAt || null;
+        setExpirationCheck(response.data.cart.expiresAt);
+      }
+    } catch (err) {
+      error.value =
+        err?.data?.message ||
+        err?.message ||
+        'Could not fetch cart, Please try again.';
+    } finally {
+      pending.value = false;
+    }
   }
 
   async function addToCart(items) {
@@ -86,14 +113,18 @@ export const useCartStore = defineStore('carts', () => {
         baseURL: config.public.apiBase,
       });
 
-      if (response) {
-        localStorage.setItem('cart', JSON.stringify(response.data.cart));
+      if (response?.data?.cart) {
         cart.value = response.data.cart;
-        expiresAt.value = response.data.cart.expiredsAt || null;
+        localStorage.setItem('cart', JSON.stringify(response.data.cart));
+        expiresAt.value = response.data.cart.expiresAt || null;
         setExpirationCheck(response.data.cart.expiresAt);
       }
     } catch (err) {
-      error.value = 'Item already exist in cart';
+      console.log('Error adding to cart:', err.data);
+      error.value =
+        err?.data?.message ||
+        err?.message ||
+        'Could not add item to cart, Please try again.';
     } finally {
       pending.value = false;
     }
@@ -111,14 +142,16 @@ export const useCartStore = defineStore('carts', () => {
       });
 
       if (response?.data?.cart) {
-        localStorage.setItem('cart', JSON.stringify(response.data.cart));
         cart.value = response.data.cart;
-      } else {
-        throw new Error('Invalid cart data received');
+        localStorage.setItem('cart', JSON.stringify(response.data.cart));
+        expiresAt.value = response.data.cart.expiresAt || null;
+        setExpirationCheck(response.data.cart.expiresAt);
       }
     } catch (apiError) {
       error.value =
-        apiError?.message || 'Could not merge cart, Please try again.';
+        apiError?.data?.message ||
+        apiError?.message ||
+        'Could not merge cart, Please try again.';
       throw apiError;
     } finally {
       pending.value = false;
@@ -135,22 +168,34 @@ export const useCartStore = defineStore('carts', () => {
         credentials: 'include',
       });
 
-      if (response) {
-        localStorage.setItem('cart', JSON.stringify(response.data.cart));
+      if (response?.data?.cart) {
         cart.value = response.data.cart;
+        localStorage.setItem('cart', JSON.stringify(response.data.cart));
+        expiresAt.value = response.data.cart.expiresAt || null;
+        setExpirationCheck(response.data.cart.expiresAt);
       }
     } catch (err) {
-      error.value = err?.message || "Can't delete item, Please try again.";
+      error.value =
+        err?.data?.message ||
+        err?.message ||
+        "Can't delete item, Please try again.";
     }
+  }
+
+  if (import.meta.client) {
+    intializeCart();
   }
 
   return {
     cart,
     pending,
     error,
+    expiresAt,
     addToCart,
     intializeCart,
+    getCart,
     mergeCart,
     deleteCartItem,
+    clearCart,
   };
 });
