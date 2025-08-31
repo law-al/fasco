@@ -7,7 +7,13 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  modules: ['@nuxt/image', '@nuxt/ui', '@vueuse/nuxt', '@pinia/nuxt'],
+  modules: [
+    '@nuxt/image',
+    '@nuxt/ui',
+    '@vueuse/nuxt',
+    '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
+  ],
   colorMode: {
     preference: 'light',
   },

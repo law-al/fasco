@@ -23,6 +23,7 @@
     "countries-list": "^3.1.1",
     "nuxt": "^4.0.3",
     "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.5.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2",
     "vee-validate": "^4.15.1",

@@ -113,7 +113,7 @@
                       v-if="cartStore.cart && cartStore.cart.items?.length > 0"
                       size="xl"
                       :to="
-                        userStore.user
+                        !!userStore.getUser
                           ? '/checkout'
                           : '/auth/login?redirect=/checkout'
                       "

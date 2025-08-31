@@ -14,8 +14,10 @@ definePageMeta({
   layout: 'default',
 });
 const cartStore = useCartStore();
+const userStore = useUserStore();
 
 onMounted(() => {
   cartStore.intializeCart();
+  userStore.intializeUser();
 });
 </script>

@@ -69,7 +69,7 @@ exports.createOrder = asyncErrorHandler(async (req, res) => {
         userId: user.id,
         orderNumber: orderNumber,
         customerEmail: customerEmail,
-        products: JSON.stringify(userCart.items.map(item => item.name)), // Fixed: 'products' not 'product'
+        products: JSON.stringify(userCart.items.map(item => item.name)),
         cartId: userCart._id.toString(),
         couponId: userCart.appliedCoupon ? userCart.appliedCoupon?.couponId?.toString() : null,
       },
@@ -148,47 +148,96 @@ exports.createWebhook = asyncErrorHandler(async (req, res) => {
 --------------------------------*/
 // if success
 async function updateOrderStatus(paymentIntent) {
-  const orderNumber = paymentIntent.metadata.orderNumber;
-  const couponId = paymentIntent.metadata.couponId;
-  const status = paymentIntent.status === 'succeeded' ? 'paid' : 'failed';
+  try {
+    const orderNumber = paymentIntent.metadata.orderNumber;
+    const couponId = paymentIntent.metadata.couponId;
+    const userId = paymentIntent.metadata.userId;
+    const status = paymentIntent.status === 'succeeded' ? 'paid' : 'failed';
 
-  const paymentMethodID = paymentIntent.payment_method;
-  const paymentMethodDetails = await stripe.paymentMethods.retrieve(paymentMethodID);
+    // Get payment method details
+    const paymentMethodID = paymentIntent.payment_method;
+    const paymentMethodDetails = await stripe.paymentMethods.retrieve(paymentMethodID);
 
-  // Update order with payment details
-  await Order.findOneAndUpdate(
-    { orderNumber },
-    {
-      'payment.status': status,
-      'payment.method': paymentMethodDetails.type,
-      'payment.transactionId': paymentIntent.id,
-      'payment.paidAt': new Date(paymentIntent.created * 1000),
-      status: status === 'paid' ? 'processing' : 'failed',
-    },
-    { new: true }
-  );
+    // Update order with payment details
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderNumber },
+      {
+        'payment.status': status,
+        'payment.method': paymentMethodDetails.type,
+        'payment.transactionId': paymentIntent.id,
+        'payment.paidAt': new Date(paymentIntent.created * 1000),
+        status: status === 'paid' ? 'processing' : 'failed',
+      },
+      { new: true }
+    );
 
-  // Update discount currentUses if coupon was applied
-  if (couponId) {
-    await Coupon.findOneAndUpdate({ _id: couponId }, { currentUses: { $inc: 1 } });
+    if (!updatedOrder) {
+      console.error('Order not found for orderNumber:', orderNumber);
+      return;
+    }
+
+    // Handle coupon usage if coupon was applied
+    if (couponId && couponId !== 'null') {
+      try {
+        await Coupon.findOneAndUpdate({ _id: couponId }, { $inc: { currentUses: 1 } });
+
+        // Create coupon usage record
+        await CouponUsage.create({
+          userId: userId,
+          couponId: couponId,
+          usedAt: new Date(),
+        });
+
+        console.log('Coupon usage updated for couponId:', couponId);
+      } catch (couponError) {
+        console.error('Error updating coupon usage:', couponError);
+      }
+    }
+
+    const clearedCart = await Cart.findOneAndUpdate(
+      { userId: userId },
+      {
+        $set: {
+          items: [],
+          totalPrice: 0,
+          appliedCoupon: null,
+        },
+      },
+      { new: true }
+    );
+
+    if (clearedCart) {
+      console.log('Successfully cleared cart for user:', userId);
+    } else {
+      console.error('Cart not found for user:', userId);
+    }
+  } catch (error) {
+    console.error('Error in updateOrderStatus:', error);
+    // NOTE: Consider implementing a retry mechanism or dead letter queue
   }
-
-  // Update CouponUsage
-  await CouponUsage.create({
-    userId: paymentIntent.metadata.userId,
-    couponId: couponId,
-  });
-
-  // clear user cart
-  await Cart.findOneAndUpdate({ userId: paymentIntent.metadata.userId }, { items: [] });
 }
 
 // if failed
 async function handleFailedPayment(paymentIntent) {
-  const orderNumber = paymentIntent.metadata.orderNumber;
+  try {
+    const orderNumber = paymentIntent.metadata.orderNumber;
 
-  // Update order status to 'failed'
-  await Order.findOneAndUpdate({ orderNumber }, { status: 'failed' });
+    // Update order status to 'failed'
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderNumber },
+      {
+        status: 'failed',
+        'payment.status': 'failed',
+      },
+      { new: true }
+    );
 
-  //
+    if (!updatedOrder) {
+      console.error('Order not found for failed payment, orderNumber:', orderNumber);
+    } else {
+      console.log('Order marked as failed:', orderNumber);
+    }
+  } catch (error) {
+    console.error('Error in handleFailedPayment:', error);
+  }
 }

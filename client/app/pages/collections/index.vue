@@ -28,10 +28,6 @@
                   {{ size }}
                 </UButton>
               </div>
-              <!-- Debug: Show selected size -->
-              <p class="mt-2 text-sm">
-                Selected: {{ selectedValue.size || 'None' }}
-              </p>
             </div>
 
             <!-- Color -->
@@ -52,10 +48,6 @@
                 >
                 </UButton>
               </div>
-              <!-- Debug: Show selected size -->
-              <p class="mt-2 text-sm">
-                Selected: {{ selectedValue.color || 'None' }}
-              </p>
             </div>
 
             <!-- Prices -->
@@ -76,10 +68,6 @@
                   {{ price.value }}
                 </UButton>
               </div>
-              <!-- Debug: Show selected size -->
-              <p class="mt-2 text-sm">
-                Selected: {{ selectedValue.priceLevel || 'None' }}
-              </p>
             </div>
 
             <UAccordion :items="items" :ui="{ label: 'font-semibold' }">
@@ -105,9 +93,6 @@
                       {{ category.value }}
                     </UButton>
                   </div>
-                  <p class="mt-2 text-sm">
-                    Selected: {{ selectedValue.slug || 'None' }}
-                  </p>
                 </div>
 
                 <!-- Brands -->
@@ -131,9 +116,6 @@
                       {{ brand }}
                     </UButton>
                   </div>
-                  <p class="mt-2 text-sm">
-                    Selected: {{ selectedValue.brand || 'None' }}
-                  </p>
                 </div>
 
                 <!-- Materials Content -->
@@ -158,9 +140,6 @@
                       {{ material }}
                     </UButton>
                   </div>
-                  <p class="mt-2 text-sm">
-                    Selected: {{ selectedValue.material || 'None' }}
-                  </p>
                 </div>
               </template>
             </UAccordion>
@@ -239,6 +218,7 @@
 const route = useRoute();
 const router = useRouter();
 const productStore = useProductStore();
+console.log('Product Store:', productStore.$state);
 const { products, pending, count, error } = storeToRefs(productStore);
 
 /* -------------------------------------------------------

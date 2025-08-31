@@ -194,10 +194,6 @@ export const useCartStore = defineStore('carts', () => {
     }
   }
 
-  if (import.meta.client) {
-    intializeCart();
-  }
-
   return {
     cart,
     pending,

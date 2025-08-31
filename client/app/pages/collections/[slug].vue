@@ -1,5 +1,5 @@
 <template>
-  <section class="w-[1200px] mx-auto font-primary text-gray-700">
+  <section class="w-[1200px] mx-auto py-20 font-primary text-gray-700">
     <Transition name="fade" mode="out-in">
       <div
         v-if="productPending"
