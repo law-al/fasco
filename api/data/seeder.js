@@ -7,7 +7,7 @@ const productData = JSON.parse(fs.readFileSync('./data/products.json', 'utf-8'))
 const couponData = JSON.parse(fs.readFileSync('./data/coupons.json', 'utf-8'));
 const dealData = JSON.parse(fs.readFileSync('./data/deals.json', 'utf-8'));
 const Product = require('../models/productModel');
-const Coupon = require('../models/couponModel');
+const { Coupon } = require('../models/couponModel');
 const Deal = require('../models/dealsModel');
 
 const deleteCollectionData = async function () {

@@ -5,8 +5,12 @@ const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
 const { default: mongoose } = require('mongoose');
 const Cart = require('../models/cartModel');
+const { Coupon, CouponUsage } = require('../models/couponModel');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+/* ------------------------------
+   CREATE ORDER
+--------------------------------*/
 exports.createOrder = asyncErrorHandler(async (req, res) => {
   const { customerEmail, shippingAddress } = req.body;
 
@@ -67,6 +71,7 @@ exports.createOrder = asyncErrorHandler(async (req, res) => {
         customerEmail: customerEmail,
         products: JSON.stringify(userCart.items.map(item => item.name)), // Fixed: 'products' not 'product'
         cartId: userCart._id.toString(),
+        couponId: userCart.appliedCoupon ? userCart.appliedCoupon._id.toString() : null,
       },
       shipping: {
         name: `${shippingAddress.firstname} ${shippingAddress.lastname}`,
@@ -103,3 +108,87 @@ exports.createOrder = asyncErrorHandler(async (req, res) => {
     await mongoSession.endSession();
   }
 });
+
+/* ------------------------------
+   Stripe Webhook
+--------------------------------*/
+exports.createWebhook = asyncErrorHandler(async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_KEY);
+  } catch (error) {
+    console.log('Webhook signature verification failed:', error.message);
+    return res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+      console.log('Payment succeeded', paymentIntent);
+      await updateOrderStatus(paymentIntent);
+      break;
+
+    case 'payment_intent.payment_failed':
+      const failedPayment = event.data.object;
+      console.log('Payment failed', failedPayment);
+      await handleFailedPayment(failedPayment);
+      break;
+
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+
+  res.json({ received: true });
+});
+
+/* ------------------------------
+   Update Order Status
+--------------------------------*/
+// if success
+async function updateOrderStatus(paymentIntent) {
+  const orderNumber = paymentIntent.metadata.orderNumber;
+  const couponId = paymentIntent.metadata.couponId;
+  const status = paymentIntent.status === 'succeeded' ? 'paid' : 'failed';
+
+  const paymentMethodID = paymentIntent.payment_method;
+  const paymentMethodDetails = await stripe.paymentMethods.retrieve(paymentMethodID);
+
+  // Update order with payment details
+  await Order.findOneAndUpdate(
+    { orderNumber },
+    {
+      'payment.status': status,
+      'payment.method': paymentMethodDetails.type,
+      'payment.transactionId': paymentIntent.id,
+      'payment.paidAt': new Date(paymentIntent.created * 1000),
+      status: status === 'paid' ? 'processing' : 'failed',
+    },
+    { new: true }
+  );
+
+  // Update discount currentUses if coupon was applied
+  if (couponId) {
+    await Coupon.findOneAndUpdate({ _id: couponId }, { currentUses: { $inc: 1 } });
+  }
+
+  // Update CouponUsage
+  await CouponUsage.create({
+    userId: paymentIntent.metadata.userId,
+    couponId: couponId,
+  });
+
+  // clear user cart
+  await Cart.findOneAndUpdate({ userId: paymentIntent.metadata.userId }, { items: [] });
+}
+
+// if failed
+async function handleFailedPayment(paymentIntent) {
+  const orderNumber = paymentIntent.metadata.orderNumber;
+
+  // Update order status to 'failed'
+  await Order.findOneAndUpdate({ orderNumber }, { status: 'failed' });
+
+  //
+}

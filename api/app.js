@@ -14,6 +14,7 @@ const cartRouter = require('./routes/cartRoute');
 const couponRouter = require('./routes/couponRoute');
 const chatRouter = require('./routes/chatRoute');
 const orderRouter = require('./routes/orderRoute');
+const webHookRouter = require('./routes/webhook');
 
 const CustomError = require('./utils/CustomError');
 
@@ -29,7 +30,15 @@ app.use(
   })
 );
 
-app.use(express.json());
+// To use webhooks, evade the express.json
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/webhooks/stripe') {
+    next(); // Skip parsing JSON
+  } else {
+    express.json()(req, res, next);
+  }
+});
+
 // app.use(morgan('dev'));
 
 app.use(
@@ -61,6 +70,7 @@ app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/coupon', couponRouter);
 app.use('/api/v1/chat', chatRouter);
 app.use('/api/v1/order', orderRouter);
+app.use('/api/webhooks', webHookRouter);
 
 // ==========================================
 // UNHANDLED ROUTES

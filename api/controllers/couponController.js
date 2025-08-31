@@ -1,5 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const Coupon = require('../models/couponModel');
+const { Coupon, CouponUsage } = require('../models/couponModel');
 const { asyncErrorHandler } = require('../utils/asyncHandler');
 const Product = require('../models/productModel');
 const Cart = require('../models/cartModel');
@@ -31,27 +31,37 @@ exports.getAllCoupon = asyncErrorHandler(async (req, res) => {
   });
 });
 
+/* ------------------------------
+   APPLY COUPON
+--------------------------------*/
 exports.applyCoupon = asyncErrorHandler(async (req, res) => {
   const { code } = req.body;
   const { user } = req.session;
   if (!user || !user.token) throw new CustomError('User not logged in', StatusCodes.BAD_REQUEST);
 
-  const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+  // Check if user has a cart
+  const cart = await Cart.findOne({ userId: user.id });
+  if (!cart) throw new CustomError('User needs to have a cart', StatusCodes.BAD_REQUEST);
 
+  // Check if coupon exists
+  const coupon = await Coupon.findOne({ code: code.toUpperCase() });
   if (!coupon) throw new CustomError('Coupon does not exist', StatusCodes.BAD_REQUEST);
 
-  const cart = await Cart.findOne({ userId: user.id });
-
-  if (!cart) throw new CustomError('User needs to have a cart', StatusCodes.BAD_REQUEST);
+  // Check if user has used this coupon before
+  const couponUsage = await CouponUsage.findOne({ userId: user.id, couponId: coupon._id });
+  if (couponUsage) throw new CustomError('User has already used this coupon', StatusCodes.BAD_REQUEST);
 
   const totalPrice = cart.totalPrice;
 
-  const couponResult = coupon.applyCoupon(totalPrice);
+  // check if coupon is applicable
+  let couponResult;
+  try {
+    couponResult = coupon.applyCoupon(totalPrice);
+  } catch (error) {
+    throw error;
+  }
 
-  const couponExist = await Cart.findOne({ 'appliedCoupon.code': code });
-
-  if (couponExist) throw new CustomError('Coupon already applied', StatusCodes.BAD_REQUEST);
-
+  // Save applied coupon to cart
   cart.appliedCoupon = {
     code: code,
     discount: couponResult.discount,

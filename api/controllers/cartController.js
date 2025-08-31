@@ -5,7 +5,7 @@ const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
 const Product = require('../models/productModel');
 const mongoose = require('mongoose');
-const Coupon = require('../models/couponModel');
+const { Coupon } = require('../models/couponModel');
 
 const checkAndUpdateInventory = async (product, productId, sku, quantity, session) => {
   const productInInventory = product.inventory.find(val => val.sku === sku);
@@ -83,6 +83,9 @@ const cleanupExpiredGuestCarts = async session => {
   }
 };
 
+/* ------------------------------
+   ADD TO CART AND UPDATE
+--------------------------------*/
 exports.addToCart = asyncErrorHandler(async (req, res) => {
   const { productId, sku, quantity } = req.body;
   let cart;
@@ -309,6 +312,9 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
   }
 });
 
+/* ------------------------------
+   GET CART
+--------------------------------*/
 exports.getCart = asyncErrorHandler(async (req, res) => {
   let cart;
   if (req.session.user?.token) {
@@ -350,7 +356,10 @@ exports.getCart = asyncErrorHandler(async (req, res) => {
   }
 });
 
-exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
+/* ------------------------------
+   DELETE ITEM FROM CART
+--------------------------------*/
+exports.deleteItemInCart = asyncErrorHandler(async (req, res) => {
   // get cart item id
   const { sku } = req.params;
   let cart;
@@ -373,16 +382,20 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
         cart.totalPrice = cart.items.reduce((acc, item) => acc + item.quantity * item.priceAtTimeAdded, 0).toFixed(2);
 
         if (cart.appliedCoupon) {
-          const coupon = await Coupon.findOne({ name: cart.appliedCoupon.code });
-          if (coupon) {
-            // Recalculate discount
-            try {
-              const couponResult = coupon.applyCoupon(cart.totalPrice);
-              cart.appliedCoupon.discount = couponResult.discount;
-            } catch (error) {
-              // If coupon is no longer valid, remove it from cart
-              cart.appliedCoupon = null;
+          try {
+            const coupon = await Coupon.findOne({ name: cart.appliedCoupon.code });
+            if (coupon) {
+              // Recalculate discount
+              try {
+                const couponResult = coupon.applyCoupon(cart.totalPrice);
+                cart.appliedCoupon.discount = couponResult.discount;
+              } catch (error) {
+                throw error;
+              }
             }
+          } catch (error) {
+            cart.appliedCoupon = null;
+            throw error;
           }
         }
         await cart.save({ session });
@@ -436,6 +449,9 @@ exports.deleteItemInCartCart = asyncErrorHandler(async (req, res) => {
   }
 });
 
+/* ------------------------------
+   MERGE CART
+--------------------------------*/
 exports.mergeCart = asyncErrorHandler(async (req, res) => {
   // check if user is logged in
   if (!req.session.user?.token) throw new CustomError('User needs to login', StatusCodes.BAD_REQUEST);
