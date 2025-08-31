@@ -68,6 +68,7 @@ exports.login = asyncErrorHandler(async (req, res) => {
   const isMatch = await user.isPasswordMatched(password, user.password);
 
   if (!isMatch) throw new CustomError('wrong credentials!', StatusCodes.BAD_REQUEST);
+
   const token = signToken(user._id);
 
   req.session.user = { id: user._id.toString(), token };
@@ -81,6 +82,12 @@ exports.login = asyncErrorHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({
     status: 'success',
     message: 'user logged in',
+    data: {
+      user: {
+        firstname: user.firstname,
+        lastname: user.lastname,
+      },
+    },
   });
 });
 
@@ -114,12 +121,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
     user.passwordResetToken = undefined;
     user.passwordResetTimer = undefined;
     await user.save({ validateBeforeSave: false });
-    return next(
-      new CustomError(
-        'There was an error sending reset password email. Please try again later',
-        StatusCodes.INTERNAL_SERVER_ERROR
-      )
-    );
+    return next(new CustomError('There was an error sending reset password email. Please try again later', StatusCodes.INTERNAL_SERVER_ERROR));
   }
 });
 

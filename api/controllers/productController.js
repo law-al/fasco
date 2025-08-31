@@ -139,18 +139,12 @@ exports.getFeatured = asyncErrorHandler(async (req, res) => {
 });
 
 function isValidObjectId(id) {
-  // console.log(mongoose.Types.ObjectId.isValid(id));
-  // console.log(/^[0-9a-fA-F]{24}$/.test(id));
   return mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 }
 
 exports.getProduct = asyncErrorHandler(async (req, res) => {
-  console.log(req.params);
   const product = await Product.findOne({
-    $or: [
-      isValidObjectId(req.params.productId) ? { _id: req.params.productId } : null,
-      { name: req.params.productId.split('-').join(' ') },
-    ].filter(Boolean),
+    $or: [isValidObjectId(req.params.productId) ? { _id: req.params.productId } : null, { name: req.params.productId.split('-').join(' ') }].filter(Boolean),
   });
 
   if (!product) throw new CustomError('No product found', StatusCodes.NOT_FOUND);

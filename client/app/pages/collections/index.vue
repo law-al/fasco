@@ -1,5 +1,5 @@
 <template>
-  <section class="font-primary text-gray-600 w-[1200px] mx-auto collection">
+  <section class="font-primary text-gray-600 w-[1200px] mx-auto">
     <div class="">
       <div class="mt-3 mb-10 text-center">
         <h2 class="font-semibold text-2xl mb-2">Fashion</h2>
@@ -28,10 +28,6 @@
                   {{ size }}
                 </UButton>
               </div>
-              <!-- Debug: Show selected size -->
-              <p class="mt-2 text-sm">
-                Selected: {{ selectedValue.size || 'None' }}
-              </p>
             </div>
 
             <!-- Color -->
@@ -52,10 +48,6 @@
                 >
                 </UButton>
               </div>
-              <!-- Debug: Show selected size -->
-              <p class="mt-2 text-sm">
-                Selected: {{ selectedValue.color || 'None' }}
-              </p>
             </div>
 
             <!-- Prices -->
@@ -76,10 +68,6 @@
                   {{ price.value }}
                 </UButton>
               </div>
-              <!-- Debug: Show selected size -->
-              <p class="mt-2 text-sm">
-                Selected: {{ selectedValue.priceLevel || 'None' }}
-              </p>
             </div>
 
             <UAccordion :items="items" :ui="{ label: 'font-semibold' }">
@@ -105,9 +93,6 @@
                       {{ category.value }}
                     </UButton>
                   </div>
-                  <p class="mt-2 text-sm">
-                    Selected: {{ selectedValue.slug || 'None' }}
-                  </p>
                 </div>
 
                 <!-- Brands -->
@@ -131,9 +116,6 @@
                       {{ brand }}
                     </UButton>
                   </div>
-                  <p class="mt-2 text-sm">
-                    Selected: {{ selectedValue.brand || 'None' }}
-                  </p>
                 </div>
 
                 <!-- Materials Content -->
@@ -158,9 +140,6 @@
                       {{ material }}
                     </UButton>
                   </div>
-                  <p class="mt-2 text-sm">
-                    Selected: {{ selectedValue.material || 'None' }}
-                  </p>
                 </div>
               </template>
             </UAccordion>
@@ -211,7 +190,7 @@
               <div class="grid grid-cols-4 gap-6">
                 <ProductCard
                   v-for="product in products"
-                  :key="product.name"
+                  :key="product._id"
                   :product="product"
                 />
               </div>
@@ -234,18 +213,12 @@
 
 <script setup>
 /* -------------------------------------------------------
- 🟢 1. Page Meta
-------------------------------------------------------- */
-definePageMeta({
-  layout: 'default',
-});
-
-/* -------------------------------------------------------
  🟢 2. Router + Store
 ------------------------------------------------------- */
 const route = useRoute();
 const router = useRouter();
 const productStore = useProductStore();
+console.log('Product Store:', productStore.$state);
 const { products, pending, count, error } = storeToRefs(productStore);
 
 /* -------------------------------------------------------
@@ -258,6 +231,7 @@ const selectedValue = ref({
   brand: '',
   material: '',
   slug: '',
+  sort: '',
   page: 1,
 });
 
@@ -441,30 +415,25 @@ onMounted(async () => {
 
 <style scoped>
 .loader {
-  box-sizing: border-box;
-  position: relative;
   width: 48px;
   height: 48px;
-  animation: spin 1s linear infinite;
-}
-.loader:after,
-.loader:before {
-  content: '';
-  width: 24px;
-  height: 24px;
-  position: absolute;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #1e293b;
   border-radius: 50%;
-  background: #374151;
-  animation: spin 1s linear infinite;
-  transform-origin: 0px 100%;
+  animation: fade-spin 1.5s ease-in-out infinite;
 }
-.loader:before {
-  transform-origin: 0 50%;
-  background: #9ca3af;
-}
-@keyframes spin {
-  to {
+
+@keyframes fade-spin {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
     transform: rotate(360deg);
+    opacity: 1;
   }
 }
 </style>

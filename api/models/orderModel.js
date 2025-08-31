@@ -18,7 +18,7 @@ const orderItemsSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
-  price: {
+  priceAtTimeAdded: {
     type: Number,
     required: true,
     min: 0,
@@ -38,22 +38,12 @@ const shippingAddressSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  street: {
-    type: String,
-    required: [true, 'A street is required'],
-    trim: true,
-  },
   city: {
     type: String,
     required: [true, 'A city is required'],
     trim: true,
   },
-  state: {
-    type: String,
-    required: [true, 'A state is required'],
-    trim: true,
-  },
-  zipCode: {
+  postalCode: {
     type: String,
     required: [true, 'A zip code is required'],
     trim: true,
@@ -63,16 +53,11 @@ const shippingAddressSchema = new mongoose.Schema({
     required: [true, 'A country is required'],
     trim: true,
   },
-  phone: {
-    type: String,
-    trim: true,
-  },
 });
 
 const billingSchema = new mongoose.Schema({
   subTotal: {
     type: Number,
-    required: true,
     min: 0,
   },
   tax: {
@@ -100,7 +85,6 @@ const billingSchema = new mongoose.Schema({
 const paymentSchema = new mongoose.Schema({
   method: {
     type: String,
-    enum: ['card', 'bank_transfer', 'mobile_money', 'apple_pay', 'google_pay', 'crypto'],
   },
   status: {
     type: String,
@@ -152,7 +136,6 @@ const orderSchema = new mongoose.Schema(
     },
     payment: {
       type: paymentSchema,
-      required: true,
     },
     status: {
       type: String,

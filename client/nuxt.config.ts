@@ -7,7 +7,13 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  modules: ['@nuxt/image', '@nuxt/ui', '@vueuse/nuxt', '@pinia/nuxt'],
+  modules: [
+    '@nuxt/image',
+    '@nuxt/ui',
+    '@vueuse/nuxt',
+    '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
+  ],
   colorMode: {
     preference: 'light',
   },
@@ -25,6 +31,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:5000',
+      stripePublicKey: process.env.NUXT_PUBLIC_STRIPE_PUBLIC_KEY || '',
     },
   },
+  sourcemap: { server: true, client: true },
 });

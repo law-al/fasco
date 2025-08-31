@@ -65,38 +65,56 @@ const couponSchema = new mongoose.Schema(
   }
 );
 
+const couponUsage = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  couponId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Coupon',
+    required: true,
+  },
+  usedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 // virtuals is like part of the mongoose schema that doesn't get saved to the database
 couponSchema.virtual('couponIsValid').get(function () {
   const now = Date.now();
-  return (
-    this.isActive &&
-    now >= this.startDate &&
-    now <= this.endDate &&
-    (this.maxUses === null || this.currentUses < this.maxUses)
-  );
+  return this.isActive && now >= this.startDate && now <= this.endDate && (this.maxUses === null || this.currentUses < this.maxUses);
 });
 
 couponSchema.methods.applyCoupon = function (orderAmount) {
-  if (!this.couponIsValid) {
-    throw new CustomError('Coupon is invalid', StatusCodes.BAD_REQUEST);
-  }
+  try {
+    if (!this.couponIsValid) {
+      throw new CustomError('Coupon is invalid', StatusCodes.BAD_REQUEST);
+    }
 
-  if (orderAmount < this.minimumAmount) {
-    throw new CustomError(`Minimum order is ${this.minimumAmount}`);
-  }
+    if (orderAmount < this.minimumAmount) {
+      throw new CustomError(`Minimum order is ${this.minimumAmount}`);
+    }
 
-  let discount = 0;
-  if (this.type === 'percentage') {
-    discount = orderAmount * (this.value / 100);
-  } else if (this.type === 'fixed') {
-    discount = this.value;
-  }
+    let discount = 0;
+    if (this.type === 'percentage') {
+      discount = orderAmount * (this.value / 100);
+    } else if (this.type === 'fixed') {
+      discount = this.value;
+    }
 
-  return {
-    discount,
-    finalAmount: orderAmount - discount,
-  };
+    return {
+      discount,
+      finalAmount: orderAmount - discount,
+    };
+  } catch (error) {
+    console.error('Error applying coupon:', error);
+    throw error;
+  }
 };
 
+const CouponUsage = mongoose.model('CouponUsage', couponUsage);
 const Coupon = mongoose.model('Coupon', couponSchema);
-module.exports = Coupon;
+module.exports = { Coupon, CouponUsage };
