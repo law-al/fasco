@@ -63,6 +63,7 @@ exports.applyCoupon = asyncErrorHandler(async (req, res) => {
 
   // Save applied coupon to cart
   cart.appliedCoupon = {
+    couponId: coupon._id,
     code: code,
     discount: couponResult.discount,
     appliedAt: Date.now(),

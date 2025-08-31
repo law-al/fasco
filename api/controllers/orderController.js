@@ -71,7 +71,7 @@ exports.createOrder = asyncErrorHandler(async (req, res) => {
         customerEmail: customerEmail,
         products: JSON.stringify(userCart.items.map(item => item.name)), // Fixed: 'products' not 'product'
         cartId: userCart._id.toString(),
-        couponId: userCart.appliedCoupon ? userCart.appliedCoupon._id.toString() : null,
+        couponId: userCart.appliedCoupon ? userCart.appliedCoupon?.couponId?.toString() : null,
       },
       shipping: {
         name: `${shippingAddress.firstname} ${shippingAddress.lastname}`,
