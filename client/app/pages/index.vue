@@ -65,7 +65,11 @@
   <!-- Deal of the week -->
 
   <section class="w-full py-10 font-primary text-gray-800 bg-gray-200">
-    <DealOfTheMonth :deals="deals" :pending="pending" :error="error" />
+    <DealOfTheMonth
+      :deals="deals"
+      :pending="dealsPending"
+      :error="dealsError"
+    />
   </section>
 
   <!-- New Arrival -->
@@ -130,8 +134,8 @@ function handleTabChange(value) {
 
 const {
   data: deals,
-  pending,
-  error,
+  pending: dealsPending,
+  error: dealsError,
 } = await useFetch(`/api/v1/products/deals-of-the-month`, {
   baseURL: config.public.apiBase,
   credentials: 'include',

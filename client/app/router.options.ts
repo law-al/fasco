@@ -4,11 +4,14 @@ export default <RouterConfig>{
   scrollBehavior(to, from, savedPosition) {
     console.log('In the router.options.ts file');
 
-    if (to.name === 'collections') {
-      console.log(to.name);
-      return savedPosition
-        ? savedPosition
-        : { el: '.collection', top: 0, behavior: 'smooth' };
+    if (savedPosition) {
+      return savedPosition;
     }
+
+    if (to.name === 'collections') {
+      return { top: 0, behavior: 'smooth' };
+    }
+
+    return { left: 0, top: 0 };
   },
 };

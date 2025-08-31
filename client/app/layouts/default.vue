@@ -63,16 +63,26 @@
                 @click="toggleSearch"
               />
               <u-icon
-                v-if="userStore.user"
+                v-if="!!userStore.getUser"
                 name="i-circum-user"
                 class="size-7 text-black cursor-pointer"
               />
               <u-icon
-                v-if="userStore.user"
+                v-if="!!userStore.getUser"
                 name="i-iconamoon-star-thin"
                 class="size-7 text-black cursor-pointer"
               />
-              <USlideover title="Cart" class="!p-2">
+              <USlideover
+                title="Cart Items"
+                description="Manage your cart items"
+                v-model="openCart"
+                :ui="{
+                  overlay: {
+                    base: 'bg-black bg-opacity-90',
+                  },
+                  padding: 'p-2',
+                }"
+              >
                 <div class="relative">
                   <u-icon
                     label="Open"
@@ -170,19 +180,25 @@
 </template>
 
 <script setup>
+/* ------------------------------
+   Imports
+--------------------------------*/
 import { useRouteQuery } from '@vueuse/router';
 import { useDebounceFn } from '@vueuse/core';
+
 /* ------------------------------
-   Pinia
+   Pinia and Composables
 --------------------------------*/
 const cartStore = useCartStore();
 const userStore = useUserStore();
+const router = useRouter();
 
 /* ------------------------------
     State
 --------------------------------*/
 const search = useRouteQuery('search', '');
 const isSearchOpen = ref(false);
+const openCart = ref(false);
 
 /* ------------------------------
     Derived Data
@@ -207,7 +223,7 @@ const navItems = [
 ];
 
 /* ------------------------------
-   Function
+    Methods
 --------------------------------*/
 function toggleSearch(val) {
   if (val === 'close') {
@@ -239,6 +255,14 @@ async function handleDeleteItem(sku) {
     });
   }
 }
+
+router.afterEach(() => {
+  openCart.value = false;
+});
+
+/* ------------------------------
+   Life Cycle Hooks
+--------------------------------*/
 </script>
 
 <style scoped>

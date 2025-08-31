@@ -1,9 +1,21 @@
 export const useUserStore = defineStore('user', () => {
+  /* ------------------------------
+     User State
+  --------------------------------*/
   const user = ref(null);
   const pending = ref(false);
   const error = ref(null);
+
   const config = useRuntimeConfig();
 
+  /* ------------------------------
+     User Getters
+  --------------------------------*/
+  const getUser = computed(() => user.value);
+
+  /* ------------------------------
+     User Actions
+  --------------------------------*/
   async function loginUser(credentials) {
     pending.value = true;
     error.value = null;
@@ -24,5 +36,5 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { user, pending, error, loginUser };
+  return { user, pending, error, getUser, loginUser };
 });

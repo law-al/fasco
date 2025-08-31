@@ -1,4 +1,5 @@
 <template>
+  <nuxt-loading-indicator />
   <div class="">
     <u-app>
       <nuxt-layout>

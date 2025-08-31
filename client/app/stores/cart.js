@@ -1,6 +1,9 @@
 import { useStorage } from '@vueuse/core';
 
 export const useCartStore = defineStore('carts', () => {
+  /* ------------------------------
+     Cart State
+  --------------------------------*/
   const cart = ref([]);
   const pending = ref(false);
   const error = ref(null);
@@ -9,6 +12,9 @@ export const useCartStore = defineStore('carts', () => {
 
   let expiryInterval = null;
 
+  /* ------------------------------
+     Cart LifeCycle
+  --------------------------------*/
   onBeforeUnmount(() => {
     if (expiryInterval) {
       clearInterval(expiryInterval);
@@ -16,9 +22,12 @@ export const useCartStore = defineStore('carts', () => {
     }
   });
 
+  /* ------------------------------
+     Cart Initialization
+  --------------------------------*/
   function intializeCart() {
     if (import.meta.client) {
-      console.log('Initializing cart from localStorage');
+      console.log('Initializing cart from localStorage..........');
       const storedCart = localStorage.getItem('cart');
       if (storedCart) {
         const parsedCart = JSON.parse(storedCart);
@@ -28,7 +37,7 @@ export const useCartStore = defineStore('carts', () => {
           parsedCart.expiresAt !== null &&
           new Date(parsedCart.expiresAt) <= new Date()
         ) {
-          console.log('Stored cart is expired, clearing cart.');
+          console.log('Stored cart is expired, clearing cart...........');
           clearCart();
           return;
         } else {
@@ -73,6 +82,9 @@ export const useCartStore = defineStore('carts', () => {
     }, checkInterval);
   }
 
+  /* ------------------------------
+   Cart Actions
+--------------------------------*/
   async function getCart() {
     try {
       pending.value = true;
