@@ -4,6 +4,12 @@
 
     <div class="grid grid-cols-2 gap-10">
       <div class="">
+        <div
+          v-if="processingOrderError"
+          class="text-red-500 text-center italic"
+        >
+          {{ processingOrderError }}
+        </div>
         <UForm
           :state="state"
           :schema="schema"
@@ -127,24 +133,30 @@
           <UButton
             type="submit"
             color="primary"
-            class="w-full mt-5 !rounded-none py-4 justify-center !bg-black text-white"
+            class="w-full mt-5 !rounded-none py-4 justify-center !bg-black text-white cursor-pointer"
             :loading="processingOrder"
             >Complete Order</UButton
           >
         </UForm>
 
         <div class="mt-5">
+          <div
+            id="error-message"
+            v-if="processingPaymentError"
+            class="text-red-500 text-center italic mb-2"
+          >
+            {{ processingPaymentError }}
+            <!-- Display error message to your customers here -->
+          </div>
           <div id="payment-element">
             <!--Stripe.js injects the Payment Element-->
           </div>
-          <div id="error-message">
-            <!-- Display error message to your customers here -->
-          </div>
+
           <UButton
             v-if="showPaymentButton"
             size="xl"
             :loading="processingPayment"
-            class="!bg-black mt-3 text-white justify-center text-sm w-full py-4"
+            class="!bg-black mt-3 text-white justify-center text-sm w-full py-4 *:rounded-none cursor-pointer"
             @click="handlePayNow"
             >Pay Now</UButton
           >
@@ -229,6 +241,13 @@
 
 <script setup>
 /* ------------------------------
+   Page meta
+--------------------------------*/
+definePageMeta({
+  middleware: 'checkout-tracker',
+});
+
+/* ------------------------------
    Imports
 --------------------------------*/
 import { countries } from 'countries-list';
@@ -269,7 +288,9 @@ const state = reactive({
 const discountCode = ref('');
 const isApplyingDiscount = ref(false);
 const processingOrder = ref(false);
+const processingOrderError = ref(null);
 const processingPayment = ref(null);
+const processingPaymentError = ref(null);
 const showPaymentButton = ref(false);
 const clientSecret = ref('');
 let stripe = null;
@@ -334,6 +355,7 @@ async function handleSubmitDiscount() {
 async function onSubmit() {
   if (stripe) return; // Prevent multiple initializations
   processingOrder.value = true;
+  processingOrderError.value = null;
   try {
     const response = await $fetch('api/v1/order/create-order', {
       method: 'POST',
@@ -368,6 +390,7 @@ async function onSubmit() {
     }
   } catch (error) {
     console.log('Error creating order:', error.data.message);
+    processingOrderError.value = error.data.message;
   } finally {
     processingOrder.value = false;
   }
@@ -381,6 +404,7 @@ async function handlePayNow() {
   }
 
   processingPayment.value = true;
+  processingOrderError.value = null;
   try {
     // This validates payment data and collect data
     const { error: submitError } = await elements.submit();
@@ -402,15 +426,16 @@ async function handlePayNow() {
 
     if (result.error) {
       if (result.error.type === 'card_error') {
-        alert('Card Error');
+        throw Error(result.error.message);
       } else {
-        alert('Great');
+        throw Error('Payment submission failed. Please try again.');
       }
     } else {
       alert('Payment Success');
     }
   } catch (error) {
-    console.log('Error: ', error);
+    console.log('Error: ', error.message);
+    processingPaymentError.value = error.message;
   } finally {
     processingPayment.value = false;
   }
