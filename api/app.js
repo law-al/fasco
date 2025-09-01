@@ -3,10 +3,8 @@ const express = require('express');
 const session = require('express-session');
 const mongoStore = require('connect-mongo');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
-// ==========================================
-// ROUTES
-// ==========================================
 const authRouter = require('./routes/authRoute');
 const userRouter = require('./routes/userRoute');
 const productsRouter = require('./routes/productsRoute');
@@ -16,16 +14,19 @@ const chatRouter = require('./routes/chatRoute');
 const orderRouter = require('./routes/orderRoute');
 const webHookRouter = require('./routes/webhook');
 
+// Version 2 Route
+const authRouterV2 = require('./routes/authRouteV2');
+
 const CustomError = require('./utils/CustomError');
 
 const app = express();
 
-// ==========================================
-// MIDDLEWARES
-// ==========================================
+/* ------------------------------
+   Middlewares
+--------------------------------*/
 app.use(
   cors({
-    origin: 'http://localhost:3000', // your frontend URL
+    origin: 'http://localhost:3000',
     credentials: true,
   })
 );
@@ -38,6 +39,8 @@ app.use((req, res, next) => {
     express.json()(req, res, next);
   }
 });
+
+app.use(cookieParser());
 
 // app.use(morgan('dev'));
 
@@ -60,9 +63,10 @@ app.use(
   })
 );
 
-// ==========================================
-// ROUTE MIDDLEWARE
-// ==========================================
+/* ------------------------------
+   Routes
+--------------------------------*/
+// Version 1
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/products', productsRouter);
@@ -72,9 +76,12 @@ app.use('/api/v1/chat', chatRouter);
 app.use('/api/v1/order', orderRouter);
 app.use('/api/webhooks', webHookRouter);
 
-// ==========================================
-// UNHANDLED ROUTES
-// ==========================================
+// Version 2
+app.use('/api/v2/auth', authRouterV2);
+
+/* ------------------------------
+   Unhandled Routes
+--------------------------------*/
 app.use((req, res, next) => {
   next(new CustomError(`can't find ${req.originalUrl} on server`, 404));
 });

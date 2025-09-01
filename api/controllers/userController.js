@@ -1,14 +1,18 @@
-const { StatusCodes } = require('http-status-codes');
 const User = require('../models/userModel');
 const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
 
 exports.getAllUser = asyncErrorHandler(async (req, res) => {
+  if (!req.selectedUser || req.selectedUser.role !== 'admin') {
+    throw new CustomError('Unauthorized access', 403);
+  }
+
   const users = await User.find();
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
-    results: users.length, // ← Add count
+    message: 'Users retrieved successfully',
+    results: users.length,
     data: {
       users,
     },
@@ -16,16 +20,12 @@ exports.getAllUser = asyncErrorHandler(async (req, res) => {
 });
 
 exports.updateMe = asyncErrorHandler(async (req, res) => {
-  if (req.body.password || req.body.confirmPassword)
-    throw new CustomError(
-      'You cannot update your password using this endpoint',
-      StatusCodes.BAD_REQUEST
-    );
+  if (req.body.password || req.body.confirmPassword) throw new CustomError('You cannot update your password using this endpoint', 400);
 
   const acceptedInput = ['firstname', 'lastname', 'email', 'phone', 'address'];
   const updateObj = {};
 
-  Object.keys(req.body).forEach((val) => {
+  Object.keys(req.body).forEach(val => {
     if (acceptedInput.includes(val)) {
       updateObj[val] = req.body[val];
     }
@@ -34,7 +34,7 @@ exports.updateMe = asyncErrorHandler(async (req, res) => {
   const { address, ...otherFields } = updateObj;
 
   const user = await User.findByIdAndUpdate(
-    req.user._id,
+    req.user.id,
     address
       ? {
           $set: otherFields,
@@ -51,10 +51,11 @@ exports.updateMe = asyncErrorHandler(async (req, res) => {
     }
   );
 
-  if (!user) throw new CustomError('User not found', StatusCodes.NOT_FOUND);
+  if (!user) throw new CustomError('User not found', 404);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'User updated successfully',
     data: {
       user,
     },
@@ -64,21 +65,13 @@ exports.updateMe = asyncErrorHandler(async (req, res) => {
 exports.updatePassword = asyncErrorHandler(async (req, res) => {
   const { currentPassword, password, confirmPassword } = req.body;
 
-  if (!currentPassword || !password || !confirmPassword)
-    throw new CustomError(
-      'Please provide current password, new password and confirm password',
-      StatusCodes.BAD_REQUEST
-    );
+  if (!currentPassword || !password || !confirmPassword) throw new CustomError('Please provide current password, new password and confirm password', 400);
 
-  const user = await User.findById(req.user._id).select('+password');
-  if (!user) throw new CustomError('User not found', StatusCodes.NOT_FOUND);
+  const user = await User.findById(req.user.id).select('+password');
+  if (!user) throw new CustomError('User not found', 404);
 
   const isMatch = await user.isPasswordMatched(currentPassword, user.password);
-  if (!isMatch)
-    throw new CustomError(
-      'Current password is incorrect',
-      StatusCodes.UNAUTHORIZED
-    );
+  if (!isMatch) throw new CustomError('Current password is incorrect', 401);
 
   user.password = password;
   user.confirmPassword = confirmPassword;
@@ -86,21 +79,21 @@ exports.updatePassword = asyncErrorHandler(async (req, res) => {
   user.updatedAt = Date.now();
   await user.save();
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
     message: 'Password updated successfully',
   });
 });
 
 exports.deleteMe = asyncErrorHandler(async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.user._id, {
+  const user = await User.findByIdAndUpdate(req.user.id, {
     $set: { isActive: false },
     $currentDate: { updatedAt: true },
   });
 
-  if (!user) throw new CustomError('User not logged in', StatusCodes.NOT_FOUND);
+  if (!user) throw new CustomError('User not logged in', 404);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
     message: 'User account deleted successfully',
   });

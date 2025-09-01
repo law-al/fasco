@@ -1,4 +1,4 @@
-const { StatusCodes } = require('http-status-codes');
+
 const Product = require('../models/productModel');
 const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
@@ -9,7 +9,7 @@ const { default: mongoose } = require('mongoose');
 exports.addProduct = asyncErrorHandler(async (req, res) => {
   const product = await Product.create(req.body);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
     message: 'A product has been added',
     data: {
@@ -109,15 +109,16 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
   const products = await results;
 
   if (products.length === 0) {
-    return res.status(StatusCodes.OK).json({
+    return res.status(200).json({
       status: 'success',
       message: 'Products not found',
       data: null,
     });
   }
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'Products retrieved successfully',
     length: products.length,
     count,
     data: {
@@ -129,8 +130,9 @@ exports.getAllProducts = asyncErrorHandler(async (req, res) => {
 exports.getFeatured = asyncErrorHandler(async (req, res) => {
   const products = await Product.find({ isFeatured: true, isActive: true }).populate('category');
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'Featured products retrieved successfully',
     length: products.length,
     data: {
       products,
@@ -147,10 +149,11 @@ exports.getProduct = asyncErrorHandler(async (req, res) => {
     $or: [isValidObjectId(req.params.productId) ? { _id: req.params.productId } : null, { name: req.params.productId.split('-').join(' ') }].filter(Boolean),
   });
 
-  if (!product) throw new CustomError('No product found', StatusCodes.NOT_FOUND);
+  if (!product) throw new CustomError('No product found', 404);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'Product retrieved successfully',
     data: {
       product,
     },
@@ -179,8 +182,9 @@ exports.getNewArrivals = asyncErrorHandler(async (req, res) => {
     products = products.filter(product => product.category.length > 0).splice(0, 6);
   }
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'New arrivals retrieved successfully',
     data: {
       products,
     },
@@ -223,7 +227,7 @@ exports.getAllDealsOfTheMonth = asyncErrorHandler(async (req, res) => {
     .lean(); // return plain object instead of mongoose document
 
   if (deals?.length === 0) {
-    return res.status(StatusCodes.OK).json({
+    return res.status(200).json({
       status: 'success',
       message: 'No deals found',
       data: {
@@ -252,8 +256,9 @@ exports.getAllDealsOfTheMonth = asyncErrorHandler(async (req, res) => {
       };
     });
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'Deals retrieved successfully',
     data: {
       deals: dealResponse,
     },
@@ -263,7 +268,7 @@ exports.getAllDealsOfTheMonth = asyncErrorHandler(async (req, res) => {
 exports.addDeals = asyncErrorHandler(async (req, res) => {
   await Deal.create(req.body);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
     message: 'Deal successfully created',
   });

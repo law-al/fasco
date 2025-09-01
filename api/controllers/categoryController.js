@@ -6,7 +6,7 @@ const CustomError = require('../utils/CustomError');
 exports.addCategory = asyncErrorHandler(async (req, res) => {
   const category = await Category.create(req.body);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
     message: 'A category has been added',
     data: {
@@ -18,11 +18,11 @@ exports.addCategory = asyncErrorHandler(async (req, res) => {
 exports.getAllCategories = asyncErrorHandler(async (req, res) => {
   const categories = await Category.find();
 
-  if (!categories)
-    throw new CustomError('No categories found', StatusCodes.BAD_REQUEST);
+  if (!categories) throw new CustomError('No categories found', 400);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'Categories retrieved successfully',
     length: categories.length,
     data: {
       categories,

@@ -1,17 +1,25 @@
 const User = require('../models/userModel');
 const { asyncErrorHandler } = require('../utils/asyncHandler');
 const CustomError = require('../utils/CustomError');
-const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendMail } = require('../utils/sendEmail');
-const { StatusCodes } = require('http-status-codes');
-const { skipMiddlewareFunction } = require('mongoose');
 
-const signToken = userId => {
-  return jwt.sign({ id: userId }, process.env.JWT_PASS, {
-    expiresIn: 30 * 60 * 1000,
+exports.checkStatus = asyncErrorHandler(async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'You are not logged in',
+    });
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'User is logged in',
+    data: {
+      user: req.session.user,
+    },
   });
-};
+});
 
 exports.register = asyncErrorHandler(async (req, res) => {
   // check if user exist and is not active
@@ -33,29 +41,19 @@ exports.register = asyncErrorHandler(async (req, res) => {
     existingUser.passwordResetTimer = undefined;
 
     await existingUser.save();
-    return res.status(StatusCodes.OK).json({
+    return res.status(201).json({
       status: 'success',
       message: 'User created successfully',
     });
   }
 
-  // check if user exist and is active
-  const existingUserIsActive = await User.findOne({
-    $and: [{ email: req.body.email }, { isActive: true }],
-  });
-
-  if (existingUserIsActive) throw new CustomError('User has signed up already', StatusCodes.BAD_REQUEST);
-
-  // else
   const user = await User.create(req.body);
 
-  const token = signToken(user._id);
+  req.session.user = { id: user._id.toString(), email: user.email, firstname: user.firstname, lastname: user.lastname };
 
-  req.session.user = { id: user._id.toString(), token };
-
-  res.status(StatusCodes.CREATED).json({
+  res.status(201).json({
     status: 'success',
-    message: 'user created',
+    message: 'User created successfully',
   });
 });
 
@@ -63,25 +61,22 @@ exports.login = asyncErrorHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }).select('+password');
-  if (!user) throw new CustomError('user not found!', StatusCodes.BAD_REQUEST);
+  if (!user) throw new CustomError('User not found!', 400);
 
-  const isMatch = await user.isPasswordMatched(password, user.password);
+  if (!user && !(await user.isPasswordMatched(password, user.password))) throw new CustomError('User not found!', 404);
 
-  if (!isMatch) throw new CustomError('wrong credentials!', StatusCodes.BAD_REQUEST);
-
-  const token = signToken(user._id);
-
-  req.session.user = { id: user._id.toString(), token };
+  req.session.user = { id: user._id.toString(), email: user.email, firstname: user.firstname, lastname: user.lastname };
 
   user.passwordResetToken = undefined;
   user.passwordResetTimer = undefined;
+  await user.save({ validateBeforeSave: false });
 
   // assign user session max age
   req.session.cookie.maxAge = +process.env.USER_SESSION_MAX_AGE;
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
-    message: 'user logged in',
+    message: 'User logged in successfully',
     data: {
       user: {
         firstname: user.firstname,
@@ -95,7 +90,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
   const { email } = req.body;
 
   const user = await User.findOne({ email });
-  if (!user) throw new CustomError('Email not correct', StatusCodes.BAD_REQUEST);
+  if (!user) throw new CustomError('Email not found', 400);
 
   const resetToken = user.createResetPasswordToken();
   // calling this function set a passwordResetToken and a passwordResetTimer, then save the user
@@ -113,15 +108,15 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
       text,
     });
 
-    res.status(StatusCodes.OK).json({
+    res.status(200).json({
       status: 'success',
-      message: 'reset link sent',
+      message: 'Reset link sent',
     });
   } catch (error) {
     user.passwordResetToken = undefined;
     user.passwordResetTimer = undefined;
     await user.save({ validateBeforeSave: false });
-    return next(new CustomError('There was an error sending reset password email. Please try again later', StatusCodes.INTERNAL_SERVER_ERROR));
+    return next(new CustomError('There was an error sending reset password email. Please try again later', 404));
   }
 });
 
@@ -134,7 +129,7 @@ exports.resetPassword = asyncErrorHandler(async (req, res) => {
     passwordResetTimer: { $gte: Date.now() }, // meaning return queries where the passwordTimer is greater than Date.now()
   });
 
-  if (!user) throw new CustomError('Reset link has expired', StatusCodes.BAD_REQUEST);
+  if (!user) throw new CustomError('Reset link has expired', 404);
 
   user.password = req.body.newPassword;
   user.confirmPassword = req.body.newConfirmPassword;
@@ -148,8 +143,8 @@ exports.resetPassword = asyncErrorHandler(async (req, res) => {
   req.session.destroy();
   res.clearCookie('connect.sid');
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
-    message: 'password reset successfully, proceed to login',
+    message: 'Password changed successfully, Please login again',
   });
 });

@@ -169,5 +169,5 @@ userSchema.methods.createResetPasswordToken = function () {
   return resetToken;
 };
 
-const User = mongoose.model('User', userSchema); // Convention: capitalize model names
+const User = mongoose.model('User', userSchema);
 module.exports = User;

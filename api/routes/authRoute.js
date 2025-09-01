@@ -1,5 +1,4 @@
 const { register, login, forgotPassword, resetPassword } = require('../controllers/authController');
-const { protect } = require('../middleware/protect');
 
 const router = require('express').Router();
 

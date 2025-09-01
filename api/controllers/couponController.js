@@ -1,4 +1,3 @@
-const { StatusCodes } = require('http-status-codes');
 const { Coupon, CouponUsage } = require('../models/couponModel');
 const { asyncErrorHandler } = require('../utils/asyncHandler');
 const Product = require('../models/productModel');
@@ -8,8 +7,9 @@ const CustomError = require('../utils/CustomError');
 exports.addCoupon = asyncErrorHandler(async (req, res) => {
   const coupon = await Coupon.create(req.body);
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'A coupon has been added',
     data: { coupon },
   });
 });
@@ -18,14 +18,16 @@ exports.getAllCoupon = asyncErrorHandler(async (req, res) => {
   const coupons = await Coupon.find();
 
   if (coupons?.length === 0) {
-    return res.status(StatusCodes.OK).json({
+    return res.status(200).json({
       status: 'success',
+      message: 'No coupons found',
       data: null,
     });
   }
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
+    message: 'Coupons retrieved successfully',
     length: coupons.length,
     data: { coupons },
   });
@@ -37,19 +39,17 @@ exports.getAllCoupon = asyncErrorHandler(async (req, res) => {
 exports.applyCoupon = asyncErrorHandler(async (req, res) => {
   const { code } = req.body;
   const { user } = req.session;
-  if (!user || !user.token) throw new CustomError('User not logged in', StatusCodes.BAD_REQUEST);
-
-  // Check if user has a cart
+  if (!user) throw new CustomError('User not logged in', 401);
   const cart = await Cart.findOne({ userId: user.id });
-  if (!cart) throw new CustomError('User needs to have a cart', StatusCodes.BAD_REQUEST);
+  if (!cart) throw new CustomError('User needs to have a cart', 400);
 
   // Check if coupon exists
   const coupon = await Coupon.findOne({ code: code.toUpperCase() });
-  if (!coupon) throw new CustomError('Coupon does not exist', StatusCodes.BAD_REQUEST);
+  if (!coupon) throw new CustomError('Coupon does not exist', 400);
 
   // Check if user has used this coupon before
   const couponUsage = await CouponUsage.findOne({ userId: user.id, couponId: coupon._id });
-  if (couponUsage) throw new CustomError('User has already used this coupon', StatusCodes.BAD_REQUEST);
+  if (couponUsage) throw new CustomError('User has already used this coupon', 400);
 
   const totalPrice = cart.totalPrice;
 
@@ -71,7 +71,7 @@ exports.applyCoupon = asyncErrorHandler(async (req, res) => {
 
   await cart.save();
 
-  res.status(StatusCodes.OK).json({
+  res.status(200).json({
     status: 'success',
     message: 'Coupon applied successfully',
     data: {
