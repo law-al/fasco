@@ -14,15 +14,15 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 exports.createOrder = asyncErrorHandler(async (req, res) => {
   const { customerEmail, shippingAddress } = req.body;
 
-  if (!req.session.user || !req.session.user.token) {
-    throw new CustomError('User not logged in', StatusCodes.BAD_REQUEST);
+  if (!req.session.user) {
+    throw new CustomError('User not logged in', 401);
   }
 
   const { user } = req.session;
   const userCart = await Cart.findOne({ userId: user.id });
 
   if (!userCart || userCart.items.length === 0) {
-    throw new CustomError('User does not have a cart to checkout', StatusCodes.BAD_REQUEST);
+    throw new CustomError('User does not have a cart to checkout', 400);
   }
 
   const mongoSession = await mongoose.startSession();
@@ -85,7 +85,7 @@ exports.createOrder = asyncErrorHandler(async (req, res) => {
       },
     });
 
-    res.status(StatusCodes.OK).json({
+    res.status(200).json({
       status: 'success',
       message: 'Order created successfully',
       data: {

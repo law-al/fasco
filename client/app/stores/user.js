@@ -19,19 +19,20 @@ export const useUserStore = defineStore('user', () => {
   /* ------------------------------
      User Actions
   --------------------------------*/
-  const intializeUser = () => {
+  const intializeUser = async () => {
     if (import.meta.client) {
-      console.log('Initializing user from localStorage..........');
-      const userFromStorage = localStorage.getItem('user');
-      if (userFromStorage) {
-        const parsedUser = JSON.parse(userFromStorage);
-        if (parsedUser.expiry && new Date(parsedUser.expiry) < new Date()) {
-          localStorage.removeItem('user');
-          return;
-        } else {
-          user.value = parsedUser;
+      console.log('Initializing user from server..........');
+      try {
+        const response = await $fetch('/api/v1/auth/check-status', {
+          method: 'GET',
+          baseURL: config.public.apiBase,
+          credentials: 'include',
+        });
+        if (response && response.status === 'success') {
+          user.value = response.data.user;
         }
-      } else {
+      } catch (error) {
+        console.error('Error checking auth status:', error);
         user.value = null;
       }
     }
@@ -41,12 +42,14 @@ export const useUserStore = defineStore('user', () => {
     pending.value = true;
     error.value = null;
     try {
+      console.log('Logging iatn user with credentials:', credentials);
       const response = await $fetch('/api/v1/auth/login', {
         method: 'POST',
         baseURL: config.public.apiBase,
         body: credentials,
         credentials: 'include',
       });
+      console.log('Login response:', response);
       if (response) {
         user.value = response.data.user;
         localStorage.setItem('user', JSON.stringify(response.data.user));

@@ -205,7 +205,7 @@
               :disabled="!discountCode || isApplyingDiscount"
               @click="handleSubmitDiscount"
               class="flex-1 h-[55px] !rounded-none py-4 justify-center !bg-black text-white"
-              >Apply Discount</UButton
+              >Discount</UButton
             >
           </div>
 

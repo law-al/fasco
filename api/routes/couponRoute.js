@@ -1,5 +1,4 @@
 const { getAllCoupon, addCoupon, applyCoupon } = require('../controllers/couponController');
-const { protect } = require('../middleware/protect');
 
 const router = require('express').Router();
 
