@@ -1,8 +1,39 @@
-# Nuxt Minimal Starter
+# Fasco App Client
+
+This is the frontend for Fasco App, built with Nuxt 3, Vue, and Tailwind CSS.
+It features a modern e-commerce UI, cart and checkout flows, session-based authentication, Stripe integration, and an AI-powered chat assistant.
+
+---
+
+## Features
+
+- Product browsing, search, and filtering
+- Cart management and checkout with Stripe
+- Session-based user authentication
+- AI-powered chat assistant for support and product recommendations
+- Coupon application and order history
+
+## AI Chat Usage
+
+- The chat box allows users to ask questions, get product suggestions, and receive support.
+- Messages are sent to the backend AI endpoint and responses are rendered in the chat UI.
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in your values:
+
+```env
+NUXT_API_BASE_URL=http://localhost:5000
+NUXT_STRIPE_PUBLIC_KEY=your_stripe_public_key
+```
+
+---
+
+## Nuxt Minimal Starter
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
-## Setup
+### Setup
 
 Make sure to install dependencies:
 
@@ -20,7 +51,7 @@ yarn install
 bun install
 ```
 
-## Development Server
+### Development Server
 
 Start the development server on `http://localhost:3000`:
 
@@ -38,7 +69,7 @@ yarn dev
 bun run dev
 ```
 
-## Production
+### Production
 
 Build the application for production:
 
@@ -73,3 +104,5 @@ bun run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+---
