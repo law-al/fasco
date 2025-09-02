@@ -16,7 +16,11 @@ exports.checkStatus = asyncErrorHandler(async (req, res) => {
     status: 'success',
     message: 'User is logged in',
     data: {
-      user: req.session.user,
+      user: {
+        firstname: req.session.user.firstname,
+        lastname: req.session.user.lastname,
+        email: req.session.user.email,
+      },
     },
   });
 });
@@ -81,6 +85,7 @@ exports.login = asyncErrorHandler(async (req, res) => {
       user: {
         firstname: user.firstname,
         lastname: user.lastname,
+        email: user.email,
       },
     },
   });

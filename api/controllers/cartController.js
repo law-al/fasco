@@ -241,7 +241,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
         );
 
         req.session.guest = { cart: { _id: cart[0]._id, itemCount: 1 } };
-        req.session.cookie.maxAge = process.env.GUEST_SESSION_MAX_AGE;
+        req.session.cookie.maxAge = Number(process.env.GUEST_SESSION_MAX_AGE);
 
         await session.commitTransaction();
 
@@ -297,7 +297,7 @@ exports.addToCart = asyncErrorHandler(async (req, res) => {
         await cart.save({ session });
 
         req.session.guest = { cart: { _id: cart._id, itemCount: cart.items.length } };
-        req.session.cookie.maxAge = process.env.GUEST_SESSION_MAX_AGE;
+        req.session.cookie.maxAge = Number(process.env.GUEST_SESSION_MAX_AGE);
 
         await session.commitTransaction();
 
@@ -434,7 +434,7 @@ exports.deleteItemInCart = asyncErrorHandler(async (req, res) => {
         await cart.save({ session });
 
         req.session.guest = { cart: { _id: cart._id, itemCount: cart.items.length } };
-        req.session.cookie.maxAge = process.env.GUEST_SESSION_MAX_AGE;
+        req.session.cookie.maxAge = Number(process.env.GUEST_SESSION_MAX_AGE);
 
         await session.commitTransaction();
 

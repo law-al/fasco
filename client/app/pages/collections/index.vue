@@ -3,7 +3,13 @@
     <div class="">
       <div class="mt-3 mb-10 text-center">
         <h2 class="font-semibold text-2xl mb-2">Fashion</h2>
-        <p>breadcrumbs</p>
+        <div class="mt-6 mb-12 w-full flex items-center justify-center">
+          <UBreadcrumb :items="breadcrumbs">
+            <template #separator>
+              <span class="mx-2 text-muted">/</span>
+            </template>
+          </UBreadcrumb>
+        </div>
       </div>
       <div class="grid grid-cols-[1fr_3fr] gap-5">
         <div class="">
@@ -212,6 +218,20 @@
 </template>
 
 <script setup>
+/* ------------------------------
+   Breadcrumbs Data
+--------------------------------*/
+const breadcrumbs = [
+  {
+    label: 'Home',
+    to: '/',
+  },
+  {
+    label: 'Collections',
+    to: '/collections',
+  },
+];
+
 /* -------------------------------------------------------
  🟢 2. Router + Store
 ------------------------------------------------------- */
@@ -349,9 +369,8 @@ function handleBookmark() {
 }
 
 /* -------------------------------------------------------
- 🟢 6. Watchers - FIXED
+ 🟢 6. Watchers
 ------------------------------------------------------- */
-// sync: route.query → selectedValue (only when route changes externally)
 watch(
   () => route.query,
   newValue => {
@@ -362,7 +381,7 @@ watch(
         ...selectedValue.value,
         ...normalizeQuery(newValue),
       };
-      // Fetch products when route changes externally (like browser back/forward)
+
       productStore.fetchProducts(newValue);
       nextTick(() => {
         isUpdating.value = false;

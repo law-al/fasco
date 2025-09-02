@@ -112,12 +112,8 @@
                     <UButton
                       v-if="cartStore.cart && cartStore.cart.items?.length > 0"
                       size="xl"
-                      :to="
-                        !!userStore.getUser
-                          ? '/checkout'
-                          : '/auth/login?redirect=/checkout'
-                      "
-                      class="!bg-black text-white justify-center capitalize cursor-pointer text-[16px]"
+                      @click="handleProceedToCheckout"
+                      class="!bg-black text-white justify-center capitalize cursor-pointer text-sm"
                       >Proceed to checkout</UButton
                     >
                   </div>
@@ -191,14 +187,19 @@ import { useDebounceFn } from '@vueuse/core';
 --------------------------------*/
 const cartStore = useCartStore();
 const userStore = useUserStore();
+const config = useRuntimeConfig();
 const router = useRouter();
 
 /* ------------------------------
     State
 --------------------------------*/
-const search = useRouteQuery('search', '');
+const search = useRouteQuery('search');
 const isSearchOpen = ref(false);
 const openCart = ref(false);
+
+watch(search, newValue => {
+  console.log('Search query changed:', newValue);
+});
 
 /* ------------------------------
     Derived Data
@@ -233,6 +234,7 @@ function toggleSearch(val) {
     isSearchOpen.value = true;
   }
 }
+
 const debouncedQuantityUpdate = useDebounceFn(value => {
   cartStore.addToCart(value);
 }, 1000);
@@ -253,6 +255,22 @@ async function handleDeleteItem(sku) {
       type: 'error',
       duration: 5000,
     });
+  }
+}
+
+async function handleProceedToCheckout() {
+  try {
+    const response = await $fetch('/api/v1/auth/check-status', {
+      method: 'GET',
+      baseURL: config.public.apiBase,
+      credentials: 'include',
+    });
+
+    if (response.status === 'success') {
+      router.push('/checkout');
+    }
+  } catch (error) {
+    router.push('/auth/login?redirect=/checkout');
   }
 }
 

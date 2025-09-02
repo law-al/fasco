@@ -18,6 +18,7 @@ const webHookRouter = require('./routes/webhook');
 const authRouterV2 = require('./routes/authRouteV2');
 
 const CustomError = require('./utils/CustomError');
+const Cart = require('./models/cartModel');
 
 const app = express();
 
@@ -55,13 +56,50 @@ app.use(
       collectionName: 'sessions',
       autoRemove: 'native',
       autoRemoveInterval: 10,
-      ttl: 24 * 60 * 60, // 24 hours
-      touchAfter: 24 * 3600, // Only update session once per 24 hours unless data changes
+      touchAfter: 24 * 3600, // Save to DB after 24 hours or when session is modified
     }),
     cookie: { maxAge: +process.env.GUEST_SESSION_MAX_AGE },
-    rolling: true, // Reset expiration on each request
+    rolling: true, // Reset cookie expiration on each request, !not on every session changes
   })
 );
+
+/**
+ * SESSION & COOKIE LIFECYCLE:
+ *
+ * INITIAL STATE:
+ * - Cookie starts with GUEST_SESSION_MAX_AGE (e.g., 4 hours)
+ *
+ * ON EVERY REQUEST (due to rolling: true):
+ * - Cookie expiration automatically extends by maxAge duration
+ * - Cart expiration needs manual sync to match cookie timing
+ *
+ * USER STATUS CHANGES:
+ * - Guest → User login: cookie.maxAge changes to USER_SESSION_MAX_AGE (e.g., 7 days)
+ * - User → Logout: cookie.maxAge resets to GUEST_SESSION_MAX_AGE
+ *
+ * SYNCHRONIZATION REQUIREMENT:
+ * - Cart.expiresAt must match cookie expiration time
+ * - Both must update together on every request to prevent:
+ *   • Orphaned carts (cart expires before session)
+ *   • Lost inventory (session expires before cart cleanup)
+ */
+// check if session has a guest and guest cart, update the the cart expiration on every request due to "rolling: true"
+
+app.use(async (req, res, next) => {
+  if (req.session.guest && req.session.guest.cart) {
+    try {
+      await Cart.findByIdAndUpdate(req.session.guest.cart._id, {
+        expiresAt: new Date(Date.now() + Number(process.env.GUEST_SESSION_MAX_AGE)),
+      });
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    next();
+  }
+});
 
 /* ------------------------------
    Routes

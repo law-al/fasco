@@ -1,5 +1,12 @@
 <template>
-  <section class="w-[1200px] mx-auto py-20 font-primary text-gray-700">
+  <section class="w-[1200px] mx-auto scroll-py-0.5 font-primary text-gray-700">
+    <div class="mt-6 mb-12 w-full flex items-center justify-center">
+      <UBreadcrumb :items="breadcrumbs">
+        <template #separator>
+          <span class="mx-2 text-muted">/</span>
+        </template>
+      </UBreadcrumb>
+    </div>
     <Transition name="fade" mode="out-in">
       <div
         v-if="productPending"
@@ -181,6 +188,27 @@
 </template>
 
 <script setup>
+definePageMeta({
+  scrollToTop: true,
+});
+/* ------------------------------
+   Breadcrumbs Data
+--------------------------------*/
+const breadcrumbs = [
+  {
+    label: 'Home',
+    to: '/',
+  },
+  {
+    label: 'Collections',
+    to: '/collections',
+  },
+  {
+    label: 'Product',
+    to: '/collections/product',
+  },
+];
+
 /* ------------------------------
    Composables & Store
 --------------------------------*/
